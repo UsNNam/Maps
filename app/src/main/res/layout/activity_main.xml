@@ -6,10 +6,145 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <fragment
-        android:id="@+id/map"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent">
+        <fragment
+            android:id="@+id/map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toTopOf="parent"
+        android:visibility="gone"
+        android:id="@+id/routeLayout"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:orientation="horizontal"
+            android:background="@color/white"
+            android:paddingBottom="20dp"
+            android:paddingTop="20dp"
+            >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="20dp"
+                android:orientation="vertical"
+                android:gravity="center_horizontal">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/start_point"></ImageView>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/three_dots"></ImageView>
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="12dp"
+                    android:layout_weight="2"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/end_point"></ImageView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp">
+
+                <!-- Start Location Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/startLocationInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:hint="Start Location"
+                    android:layout_marginBottom="22dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/startLocationEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="10dp"
+                        android:inputType="text"
+                        />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Destination Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/destinationInputLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:hint="Destination">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/destinationEditText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingVertical="10dp"
+                        android:inputType="text"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/routeInfo"
+            android:orientation="vertical"
+            android:background="@drawable/round_top_corner"
+            >
+
+
+        </LinearLayout>
+
+        <View
+            android:id="@+id/bottomSheetHandle"
+            android:layout_width="match_parent"
+            android:layout_weight="1"
+            android:layout_height="0dp"/>
+            <!--android:layout_gravity="bottom" -->
+
+
+        <include
+            layout="@layout/route_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/bottomSheet"
+            android:layout_alignParentBottom="true" />
+
+
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/searchFragment"></FrameLayout>
+    </LinearLayout>
+
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

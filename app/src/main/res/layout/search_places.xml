@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    tools:ignore="MissingConstraints">
+
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="60dp"
+            android:autofillHints=""
+            android:background="@drawable/textview_border"
+            android:gravity="center_vertical|start"
+            android:hint="Search here"
+            android:inputType="text"
+            android:paddingStart="10dp"
+            android:shadowDy="2"
+            android:shadowRadius="1"
+            android:textColor="#AFA4A4"
+            android:textSize="17sp"
+            tools:ignore="MissingConstraints" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/restaurant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/restaurant"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Restaurants"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/hotel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/hotel"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Hotel"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/gas"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/gas"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Gas"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/coffee"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/coffee"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Coffee"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/groceries"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/cart"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Groceries"
+                    android:textColor="@color/black" />
+
+                <Button
+                    android:id="@+id/shopping"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableLeft="@drawable/shopping"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Shopping"
+                    android:textColor="@color/black" />
+                <!-- Thêm các Button khác nếu bạn muốn -->
+
+            </LinearLayout>
+
+        </HorizontalScrollView>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:id="@+id/listViewSearchResult"
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingBottom="30dp"
+                android:layout_alignParentBottom="true"
+                android:background="@color/white"
+                android:orientation="vertical"
+                android:visibility="invisible">
+                <Button
+                    android:id="@+id/back"
+                    android:layout_width="wrap_content"
+                    android:layout_height="35dp"
+                    android:backgroundTint="@color/white"
+                    android:drawableLeft="@drawable/back"
+                    android:foreground="@drawable/button_selector"
+                    android:paddingStart="10dp" />
+
+                <ListView
+                    android:id="@+id/listView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#44aaaaaa"
+                    />
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+</LinearLayout>

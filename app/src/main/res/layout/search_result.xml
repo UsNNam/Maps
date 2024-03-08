@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+
+        android:background="@color/white"
+        android:orientation="vertical"
+        android:padding="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingConstraints">
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/viewgroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal" />
+        </HorizontalScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_selector"
+            android:orientation="horizontal"
+
+            android:textColor="#000000">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="3dp"
+                android:layout_weight="11"
+
+                android:text="Location Name"
+
+                android:textColor="#000000"
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end|right">
+
+                <Button
+                    android:id="@+id/save"
+
+                    android:layout_width="43dp"
+                    android:layout_height="43dp"
+                    android:backgroundTint="@android:color/white"
+                    android:drawableTop="@drawable/save"
+                    android:foreground="@drawable/button_selector"
+                    android:gravity="center"
+
+                    android:paddingTop="14dp"
+                    android:textColor="#000000"
+                    android:textSize="15sp"
+                    tools:ignore="RtlHardcoded" />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_marginEnd="5dp"
+                android:text="Rating"
+
+                android:textColor="#4E4A4A" />
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                style="@android:style/Widget.DeviceDefault.RatingBar.Small"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:layout_margin="0dp"
+                android:layout_marginEnd="5dp"
+                android:numStars="5"
+                android:padding="0dp"
+                android:paddingStart="0dp"
+                android:progressTint="@android:color/holo_orange_light"
+                android:rating="3.5"
+
+                android:stepSize="0.5" />
+
+            <TextView
+                android:id="@+id/totalRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="(20)"
+                android:textColor="#4E4A4A">
+
+            </TextView>
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Price level: lowest price"
+
+            android:textColor="#4E4A4A" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Open "
+                android:textColor="#2E7A31" />
+
+            <TextView
+                android:id="@+id/addition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textColor="#938F8F" />
+        </LinearLayout>
+
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/direct"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="#2196F3"
+                    android:drawableLeft="@drawable/direction"
+                    android:text="Direct"
+                    android:textColor="@color/white" />
+
+                <Button
+                    android:id="@+id/call"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:backgroundTint="#2196F3"
+                    android:drawableLeft="@drawable/call"
+                    android:text="Call"
+
+                    android:textColor="@color/white"
+                    tools:ignore="DuplicateIds" />
+
+                <Button
+
+                    android:id="@+id/share"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:backgroundTint="#2196F3"
+                    android:drawableLeft="@drawable/share"
+                    android:text="Share"
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
+        </HorizontalScrollView>
+
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,14 @@
+<!-- res/drawable/background_hover.xml -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Mặc định -->
+    <item android:state_enabled="true" android:state_pressed="false">
+        <color android:color="@android:color/transparent" />
+    </item>
+
+    <!-- Khi hover (được nhấn giữ) -->
+    <item android:state_enabled="true" android:state_pressed="true">
+        <color android:color="#BE55524D" />
+    </item>
+
+</selector>

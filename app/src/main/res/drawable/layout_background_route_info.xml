@@ -1,0 +1,4 @@
+<!-- layout_background.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/round_top_corner"/>
+</layer-list>
