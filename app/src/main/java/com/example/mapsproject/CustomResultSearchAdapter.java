@@ -139,8 +139,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                     Log.d("LatLng String2", result);
                     routeActivity.displayRoute(result, places[position].getLatLngString());
                 });
-                LinearLayout searchLayout = ((MainActivity) context).findViewById(R.id.searchLayout);
-                searchLayout.setVisibility(LinearLayout.GONE);
+
                 //Location location = GoogleMap.getMyLocation();
             }
         });
