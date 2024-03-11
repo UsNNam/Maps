@@ -10,9 +10,12 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+
+import com.example.mapsproject.Entity.TravelMode;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.android.PolyUtil;
@@ -30,15 +33,18 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class HttpRequestTask extends AsyncTask<Void, Void, String> {
 
     Context context;
     EditText startLocationEditText;
     EditText destinationLocationEditText;
+    String travelMode;
     double lat1, lng1, lat2, lng2;
 
-    public HttpRequestTask(Context context) {
+    public HttpRequestTask(Context context, TravelMode travelMode){
         this.context = context;
+        this.travelMode = travelMode.getString();
     }
 
     private static final String TAG = "HttpRequestTask";
@@ -62,6 +68,10 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
             lat2 = Double.parseDouble(destinationLocationParts[0]);
             lng2 = Double.parseDouble(destinationLocationParts[1]);
 
+/*            GlobalVariable.myMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(lat2, lng2))
+                    .title("Destination"));*/
+
             String urlString = "https://routes.googleapis.com/directions/v2:computeRoutes";
 
             String postData = String.format("{\"origin\":" +
@@ -70,11 +80,12 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                     "{\"latitude\": %s ,\"longitude\":%s}}}," +
                     "\"destination\":{\"location\":{\"latLng\":" +
                     "{\"latitude\":%s,\"longitude\":%s}}}," +
-                    "\"travelMode\":\"DRIVE\",\"routingPreference\":\"TRAFFIC_AWARE\"," +
+                    "\"travelMode\": \"%s\", \"extraComputations\": [\"TRAFFIC_ON_POLYLINE\"]," +
+                    "\"routingPreference\":\"TRAFFIC_AWARE\"," +
                     "\"departureTime\":\"2024-10-15T15:01:23.045123456Z\"," +
                     "\"computeAlternativeRoutes\":false,\"routeModifiers\":{\"avoidTolls\":false," +
                     "\"avoidHighways\":false,\"avoidFerries\":false},\"languageCode\":\"en-US\"," +
-                    "\"units\":\"IMPERIAL\"}", lat1, lng1, lat2, lng2);
+                    "\"units\":\"IMPERIAL\"}", lat1, lng1, lat2, lng2, travelMode);
 
 
             URL url = new URL(urlString);
@@ -83,7 +94,8 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("X-Goog-Api-Key", "AIzaSyAme6iuddzeJcueQi-LQxcMc6N7cb_XkeM");
             conn.setRequestProperty("X-Goog-FieldMask", "routes.duration,routes.distanceMeters," +
-                    "routes.polyline.encodedPolyline,routes.legs.steps");
+                    "routes.polyline.encodedPolyline,routes.legs.steps," +
+                    "routes.travelAdvisory,routes.legs.travelAdvisory");
             conn.setDoOutput(true);
 
             DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
@@ -174,6 +186,9 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                             .getString("encodedPolyline");
                     JSONArray steps = route.getJSONArray("legs").getJSONObject(0)
                             .getJSONArray("steps");
+                    JSONArray trafficArray = route.getJSONArray("legs").getJSONObject(0)
+                            .getJSONObject("travelAdvisory")
+                            .getJSONArray("speedReadingIntervals");
                     for (int j = 0; j < steps.length(); j++) {
                         JSONObject step = steps.getJSONObject(j);
                         String instruction = step.getJSONObject("navigationInstruction").
@@ -181,6 +196,8 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                         String distance = step.getString("distanceMeters");
                         routeSteps.add(new RouteStep(distance, instruction, R.drawable.start_point));
                     }
+
+
 
                     CustomAdapterRouteInfo customAdapterRouteInfo = new CustomAdapterRouteInfo(context, R.layout.custom_row_route, routeSteps);
                     ListView routeInfoListView = ((MainActivity) context).findViewById(R.id.listViewRouteInfo);
@@ -197,7 +214,7 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                     Log.d(TAG, "Polyline: " + encodedPolyline);
                     Log.d(TAG, "Duration: " + duration);
 
-                    drawPolyline(encodedPolyline, distanceMeters, duration);
+                    drawPolyline(encodedPolyline, distanceMeters, duration, trafficArray);
 
                     LatLng startLocation = new LatLng(lat1, lng1);
                     GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(startLocation));
@@ -213,18 +230,62 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
     }
 
     //Draw the polyline on the map
-    public void drawPolyline(String encodedPolyline, String distanceMeters, String durationSeconds) {
+    public void drawPolyline(String encodedPolyline, String distanceMeters, String durationSeconds,
+                             JSONArray trafficArray) {
         try{
             //Decode the encodedPolyline
             List<LatLng> decodedPolyline = PolyUtil.decode(encodedPolyline);
 
+
+
             PolylineOptions polylineOptions = new PolylineOptions();
+/*            for(int i = 0; i < trafficArray.length(); i++){
+                JSONObject traffic = trafficArray.getJSONObject(i);
+                int start = traffic.getInt("startPolylinePointIndex");
+                int end = traffic.getInt("endPolylinePointIndex");
+                String speed = traffic.getString("speed");
+                int color;
+                if(speed.equals("SLOW")){
+                    color = Color.YELLOW;
+                } else if(speed.equals("TRAFFIC_JAM")){
+                    color = Color.RED;
+                } else {
+                    color = Color.BLUE;
+                }
+
+                // Add polyline segment with corresponding color
+                for (int j = start; j < end; j++) {
+                    polylineOptions.add(decodedPolyline.get(j));
+                }
+                polylineOptions.color(color);
+            }*/
             for (LatLng point : decodedPolyline) {
                 polylineOptions.add(point);
             }
 
+            for(int i = 0; i < trafficArray.length(); i++){
+                JSONObject traffic = trafficArray.getJSONObject(i);
+                int start = traffic.getInt("startPolylinePointIndex");
+                int end = traffic.getInt("endPolylinePointIndex");
+                String speed = traffic.getString("speed");
+                if(speed.equals("SLOW")){
+                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
+                            .color(Color.YELLOW);
+                }
+                else if(speed.equals("TRAFFIC_JAM")){
+                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
+                            .color(Color.RED);
+                }
+                else {
+                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
+                            .color(Color.BLUE);
+                }
+
+                Log.d("Traffic", "Start: " + start + " | End: "+ end + " | Speed: " + speed);
+            }
+
             // Set properties for the polyline (e.g., color, width)
-            polylineOptions.width(10).color(Color.BLUE);
+            //polylineOptions.width(10).color(Color.BLUE);
 
             if(GlobalVariable.polyline != null){
                 GlobalVariable.polyline.remove();

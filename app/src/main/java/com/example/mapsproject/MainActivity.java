@@ -22,6 +22,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.example.mapsproject.Entity.TravelMode;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -122,7 +123,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     try {
-                        new HttpRequestTask(curContext).execute();
+                        new HttpRequestTask(curContext, TravelMode.DRIVE).execute();
                     } catch (Exception e) {
                         Log.e("Error HTTP", e.getMessage());
                     }
