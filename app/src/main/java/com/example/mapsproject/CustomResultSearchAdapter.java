@@ -6,6 +6,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
 import android.util.Log;
@@ -18,10 +19,15 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.model.OpeningHours;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -32,11 +38,15 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
 
 public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     private final Context context;
     private final PlaceInfo[] places;
 
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
+
+    private FusedLocationProviderClient fusedLocationClient;
 
     public CustomResultSearchAdapter(Context context, int layoutToBeInflated, PlaceInfo[] places, PlacesClient placesClient) {
         super(context, layoutToBeInflated, places);
@@ -57,6 +67,42 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
 
         Button call, direct, share;
     }
+
+
+    private CompletableFuture<String> getLastLocation() {
+        CompletableFuture<String> future = new CompletableFuture<>();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        String[] stringArray = new String[2];
+        if (ActivityCompat.checkSelfPermission(context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+        {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            Toast.makeText(context, "Location permission is required", Toast.LENGTH_SHORT).show();
+            return future;
+        }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener((MainActivity) context, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            // Got last known location
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            String result = String.valueOf(latitude) + "," + String.valueOf(longitude);
+                            Toast.makeText(context, "Latitude: " + latitude + ", Longitude: " + longitude, Toast.LENGTH_SHORT).show();
+                            future.complete(result);
+                        } else {
+                            Toast.makeText(context, "Location is null", Toast.LENGTH_SHORT).show();
+                            future.complete("");
+                        }
+                    }
+                });
+        return future;
+    }
+
+
 
     @NonNull
     @SuppressLint("SetTextI18n")
@@ -87,9 +133,14 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         holder.direct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("LatLng String", places[position].getLatLngString());
+                Log.d("LatLng String1", places[position].getLatLngString());
                 RouteActivity routeActivity = new RouteActivity(context);
-                //routeActivity.displayRoute(places[position].getLatLngString());
+                getLastLocation().thenAccept(result -> {
+                    Log.d("LatLng String2", result);
+                    routeActivity.displayRoute(result, places[position].getLatLngString());
+                });
+                LinearLayout searchLayout = ((MainActivity) context).findViewById(R.id.searchLayout);
+                searchLayout.setVisibility(LinearLayout.GONE);
                 //Location location = GoogleMap.getMyLocation();
             }
         });

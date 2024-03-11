@@ -25,8 +25,7 @@ public class RouteActivity {
         routeLayout.setVisibility(LinearLayout.VISIBLE);
         startLocationEditText.setText(startLocation);
         endLocationEditText.setText(endLocation);
-        endLocationEditText.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER));
-        endLocationEditText.dispatchKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_ENTER));
+        new HttpRequestTask(context).execute();
 
     }
 

@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
@@ -34,6 +35,7 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
     Context context;
     EditText startLocationEditText;
     EditText destinationLocationEditText;
+    double lat1, lng1, lat2, lng2;
 
     public HttpRequestTask(Context context) {
         this.context = context;
@@ -45,34 +47,36 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
 
-        startLocationEditText = ((MainActivity) context).findViewById(R.id.startLocationEditText);
-        destinationLocationEditText = ((MainActivity) context).findViewById(R.id.destinationEditText);
-
-        // Get the latitude and longitude of the start location
-        String[] startLocationParts = startLocationEditText.getText().toString().split(",");
-        double lat1 = Double.parseDouble(startLocationParts[0]);
-        double lng1 = Double.parseDouble(startLocationParts[1]);
-
-        // Get the latitude and longitude of the destination location
-        String[] destinationLocationParts = destinationLocationEditText.getText().toString().split(",");
-        double lat2 = Double.parseDouble(destinationLocationParts[0]);
-        double lng2 = Double.parseDouble(destinationLocationParts[1]);
-
-        String urlString = "https://routes.googleapis.com/directions/v2:computeRoutes";
-
-        String postData = String.format("{\"origin\":" +
-                "{\"location\":" +
-                "{\"latLng\":" +
-                "{\"latitude\": %s ,\"longitude\":%s}}}," +
-                "\"destination\":{\"location\":{\"latLng\":" +
-                "{\"latitude\":%s,\"longitude\":%s}}}," +
-                "\"travelMode\":\"DRIVE\",\"routingPreference\":\"TRAFFIC_AWARE\"," +
-                "\"departureTime\":\"2024-10-15T15:01:23.045123456Z\"," +
-                "\"computeAlternativeRoutes\":false,\"routeModifiers\":{\"avoidTolls\":false," +
-                "\"avoidHighways\":false,\"avoidFerries\":false},\"languageCode\":\"en-US\"," +
-                "\"units\":\"IMPERIAL\"}", lat1, lng1, lat2, lng2);
 
         try {
+            startLocationEditText = ((MainActivity) context).findViewById(R.id.startLocationEditText);
+            destinationLocationEditText = ((MainActivity) context).findViewById(R.id.destinationEditText);
+
+            // Get the latitude and longitude of the start location
+            String[] startLocationParts = startLocationEditText.getText().toString().split(",");
+            lat1 = Double.parseDouble(startLocationParts[0]);
+            lng1 = Double.parseDouble(startLocationParts[1]);
+
+            // Get the latitude and longitude of the destination location
+            String[] destinationLocationParts = destinationLocationEditText.getText().toString().split(",");
+            lat2 = Double.parseDouble(destinationLocationParts[0]);
+            lng2 = Double.parseDouble(destinationLocationParts[1]);
+
+            String urlString = "https://routes.googleapis.com/directions/v2:computeRoutes";
+
+            String postData = String.format("{\"origin\":" +
+                    "{\"location\":" +
+                    "{\"latLng\":" +
+                    "{\"latitude\": %s ,\"longitude\":%s}}}," +
+                    "\"destination\":{\"location\":{\"latLng\":" +
+                    "{\"latitude\":%s,\"longitude\":%s}}}," +
+                    "\"travelMode\":\"DRIVE\",\"routingPreference\":\"TRAFFIC_AWARE\"," +
+                    "\"departureTime\":\"2024-10-15T15:01:23.045123456Z\"," +
+                    "\"computeAlternativeRoutes\":false,\"routeModifiers\":{\"avoidTolls\":false," +
+                    "\"avoidHighways\":false,\"avoidFerries\":false},\"languageCode\":\"en-US\"," +
+                    "\"units\":\"IMPERIAL\"}", lat1, lng1, lat2, lng2);
+
+
             URL url = new URL(urlString);
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
@@ -194,6 +198,11 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                     Log.d(TAG, "Duration: " + duration);
 
                     drawPolyline(encodedPolyline, distanceMeters, duration);
+
+                    LatLng startLocation = new LatLng(lat1, lng1);
+                    GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(startLocation));
+                    // Zoom in the Google Map, people don't need to zoom in manually
+                    GlobalVariable.myMap.animateCamera(CameraUpdateFactory.zoomTo(15));
                 }
             } catch (Exception e) {
                 Log.d(TAG,"Error: " + e.getMessage());

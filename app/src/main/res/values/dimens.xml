@@ -1,6 +1,6 @@
 <resources>
     <!-- Dimension for the original height of the bottom sheet -->
-    <dimen name="bottom_sheet_original_height">60dp</dimen>
+    <dimen name="bottom_sheet_original_height">55dp</dimen>
 
     <!-- Dimension for the expanded height of the bottom sheet -->
     <dimen name="bottom_sheet_expanded_height">500dp</dimen>
