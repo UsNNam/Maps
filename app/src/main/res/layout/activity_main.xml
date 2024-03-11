@@ -207,13 +207,37 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:orientation="vertical"
         android:id="@+id/searchLayout">
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/searchFragment"></FrameLayout>
+        <ImageButton
+            android:id="@+id/mapStyleButton"
+            android:layout_width="46dp"
+            android:layout_height="50dp"
+            android:layout_gravity="right"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/round_button"
+            android:padding="16dp"
+            android:scaleType="centerInside"
+            android:src="@drawable/layer" />
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/mapStyleSelector"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#ffffff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:visibility="invisible">
 
+        <include layout="@layout/map_style_selector"/>
+
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
