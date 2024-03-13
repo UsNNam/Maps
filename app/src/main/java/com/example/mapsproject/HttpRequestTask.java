@@ -68,7 +68,7 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
             lat2 = Double.parseDouble(destinationLocationParts[0]);
             lng2 = Double.parseDouble(destinationLocationParts[1]);
 
-/*            GlobalVariable.myMap.addMarker(new MarkerOptions()
+            /*GlobalVariable.myMap.addMarker(new MarkerOptions()
                     .position(new LatLng(lat2, lng2))
                     .title("Destination"));*/
 
@@ -92,7 +92,7 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("X-Goog-Api-Key", "AIzaSyAme6iuddzeJcueQi-LQxcMc6N7cb_XkeM");
+            conn.setRequestProperty("X-Goog-Api-Key", context.getResources().getString(R.string.api_key));
             conn.setRequestProperty("X-Goog-FieldMask", "routes.duration,routes.distanceMeters," +
                     "routes.polyline.encodedPolyline,routes.legs.steps," +
                     "routes.travelAdvisory,routes.legs.travelAdvisory");

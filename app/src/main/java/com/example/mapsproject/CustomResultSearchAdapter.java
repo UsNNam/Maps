@@ -66,6 +66,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         TextView addition;
 
         Button call, direct, share;
+        Button save;
     }
 
 
@@ -124,6 +125,8 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
             holder.call = (Button) convertView.findViewById(R.id.call);
             holder.direct = (Button) convertView.findViewById(R.id.direct);
             holder.share = (Button) convertView.findViewById(R.id.share);
+            holder.save = (Button) convertView.findViewById(R.id.save);
+
 
             convertView.setTag(holder);
         } else {

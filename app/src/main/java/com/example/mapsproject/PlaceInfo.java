@@ -89,7 +89,7 @@ public class PlaceInfo {
         OkHttpClient client = new OkHttpClient();
 
         // Thay thế "API_KEY" bằng khóa API của bạn và "PLACE_ID_TO_QUERY" bằng ID của địa điểm cụ thể bạn muốn lấy thông tin
-        String apiKey = "AIzaSyAme6iuddzeJcueQi-LQxcMc6N7cb_XkeM";
+        String apiKey = "AIzaSyC4eQTS4oxvsgONLXCsbeBFUp68WhXYTJ0";
         String placeId = place.getId();
 
         // Xây dựng URL của API
