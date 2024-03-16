@@ -108,165 +108,170 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     @NonNull
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-        ViewHolder holder;
-        if (convertView == null) {
-            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-            convertView = inflater.inflate(R.layout.search_result, null);
+        try {
+            ViewHolder holder;
+            if (convertView == null) {
+                LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+                convertView = inflater.inflate(R.layout.search_result, null);
 
-            holder = new ViewHolder();
-            holder.name = (TextView) convertView.findViewById(R.id.name);
-            holder.rating = (TextView) convertView.findViewById(R.id.rating);
-            holder.price = (TextView) convertView.findViewById(R.id.price);
-            holder.status = (TextView) convertView.findViewById(R.id.status);
-            holder.ratingBar = (RatingBar) convertView.findViewById(R.id.ratingBar);
-            holder.totalRating = (TextView) convertView.findViewById(R.id.totalRating);
-            holder.photoList = (LinearLayout) convertView.findViewById(R.id.viewgroup);
-            holder.addition = (TextView) convertView.findViewById(R.id.addition);
-            holder.call = (Button) convertView.findViewById(R.id.call);
-            holder.direct = (Button) convertView.findViewById(R.id.direct);
-            holder.share = (Button) convertView.findViewById(R.id.share);
-            holder.save = (Button) convertView.findViewById(R.id.save);
-
-
-            convertView.setTag(holder);
-        } else {
-            holder = (ViewHolder) convertView.getTag();
-        }
-
-        holder.direct.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("LatLng String1", places[position].getLatLngString());
-                RouteActivity routeActivity = new RouteActivity(context);
-                getLastLocation().thenAccept(result -> {
-                    Log.d("LatLng String2", result);
-                    routeActivity.displayRoute(result, places[position].getLatLngString());
-                });
-
-                //Location location = GoogleMap.getMyLocation();
-            }
-        });
-
-        Place cur = places[position].place;
-
-        Log.i("Place1", cur.toString());
-        Log.i("Place1", cur.getName());
+                holder = new ViewHolder();
+                holder.name = (TextView) convertView.findViewById(R.id.name);
+                holder.rating = (TextView) convertView.findViewById(R.id.rating);
+                holder.price = (TextView) convertView.findViewById(R.id.price);
+                holder.status = (TextView) convertView.findViewById(R.id.status);
+                holder.ratingBar = (RatingBar) convertView.findViewById(R.id.ratingBar);
+                holder.totalRating = (TextView) convertView.findViewById(R.id.totalRating);
+                holder.photoList = (LinearLayout) convertView.findViewById(R.id.viewgroup);
+                holder.addition = (TextView) convertView.findViewById(R.id.addition);
+                holder.call = (Button) convertView.findViewById(R.id.call);
+                holder.direct = (Button) convertView.findViewById(R.id.direct);
+                holder.share = (Button) convertView.findViewById(R.id.share);
+                holder.save = (Button) convertView.findViewById(R.id.save);
 
 
-        //Name
-        if (cur.getName() != null) {
-            holder.name.setText(cur.getName());
-        }
-
-        // Rating
-        if (cur.getRating() != null) {
-            Log.i("Place1", String.valueOf(cur.getRating()));
-            holder.rating.setText(String.valueOf(cur.getRating()));
-            holder.ratingBar.setRating(cur.getRating().floatValue());
-        }
-
-        //Total User Ratings
-        if (cur.getUserRatingsTotal() != null) {
-            Log.i("Place2", String.valueOf(cur.getUserRatingsTotal()));
-            holder.totalRating.setText("(" + String.valueOf(cur.getUserRatingsTotal()) + ")");
-        }
-
-        //Price Level
-        if (cur.getPriceLevel() != null) {
-            Log.i("Place3", String.valueOf(cur.getPriceLevel()));
-
-            if (cur.getPriceLevel() == 0) holder.price.setText("Price Level: Lowest Price");
-            else if (cur.getPriceLevel() == 1) holder.price.setText("Price Level: Inexpensive");
-            else if (cur.getPriceLevel() == 2) holder.price.setText("Price Level: Moderate");
-            else if (cur.getPriceLevel() == 3) holder.price.setText("Price Level: Expensive");
-            else if (cur.getPriceLevel() == 4) holder.price.setText("Price Level: Very Expensive");
-            else holder.price.setText("Price Level: Unknown");
-        } else {
-            holder.price.setText("Price Level: Unknown");
-        }
-
-
-        //Phone
-        if (cur.getPhoneNumber() != null) {
-            holder.call.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_DIAL);
-                    intent.setData(Uri.parse("tel:" + cur.getPhoneNumber()));
-                    startActivity(context, intent, null);
-                }
-            });
-        } else {
-            holder.call.setVisibility(View.GONE);
-        }
-
-        //Share
-        if (cur.getWebsiteUri() != null) {
-            holder.share.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
-                    intent.putExtra(Intent.EXTRA_TEXT, cur.getWebsiteUri().toString());
-                    startActivity(context, Intent.createChooser(intent, "Share"), null);
-                }
-            });
-        } else {
-            holder.share.setVisibility(View.GONE);
-        }
-
-
-        //Opening Hours
-        holder.addition.setText("");
-        holder.status.setText("Closed ");
-        holder.status.setTextColor(context.getResources().getColor(R.color.red));
-
-        if (cur.getCurrentOpeningHours() != null) {
-            OpeningHours openingHours = cur.getCurrentOpeningHours();
-            List<String> week = openingHours.getWeekdayText();
-
-            for (int i = 0; i < week.size(); i++) {
-                Log.i("Weekday", week.get(i));
+                convertView.setTag(holder);
+            } else {
+                holder = (ViewHolder) convertView.getTag();
             }
 
-            LocalDate currentDate = LocalDate.now();
+            holder.direct.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Log.d("LatLng String1", places[position].getLatLngString());
+                    RouteActivity routeActivity = new RouteActivity(context);
+                    getLastLocation().thenAccept(result -> {
+                        Log.d("LatLng String2", result);
+                        routeActivity.displayRoute(result, places[position].getLatLngString());
+                    });
 
-            Log.i("LocalDate", currentDate.toString());
-            // Lấy thông tin về thứ của hôm nay
-            DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
-            int day = dayOfWeek.getValue() - 1;
+                    //Location location = GoogleMap.getMyLocation();
+                }
+            });
 
-            Log.i("Today", week.get(day));
+            Place cur = places[position].place;
 
-            handlerTime(holder, week, day);
-        }
-
-        // Fetch Photos
-        holder.photoList.removeAllViews();
-        if (places[position].photos != null) {
+            Log.i("Place1", cur.toString());
+            Log.i("Place1", cur.getName());
 
 
-            Log.i("PhotoAdapter", position + " " + places[position].photos.length);
+            //Name
+            if (cur.getName() != null) {
+                holder.name.setText(cur.getName());
+            }
 
-            for (int i = 0; i < places[position].curLoad; i++) {
-                final View singleFrame = LayoutInflater.from(context).inflate(R.layout.photo_item, null);
-                ImageView photo = (ImageView) singleFrame.findViewById(R.id.photo);
+            // Rating
+            if (cur.getRating() != null) {
+                Log.i("Place1", String.valueOf(cur.getRating()));
+                holder.rating.setText(String.valueOf(cur.getRating()));
+                holder.ratingBar.setRating(cur.getRating().floatValue());
+            }
 
-                int finalI = i;
-                ((MainActivity) context).runOnUiThread(new Runnable() {
+            //Total User Ratings
+            if (cur.getUserRatingsTotal() != null) {
+                Log.i("Place2", String.valueOf(cur.getUserRatingsTotal()));
+                holder.totalRating.setText("(" + String.valueOf(cur.getUserRatingsTotal()) + ")");
+            }
+
+            //Price Level
+            if (cur.getPriceLevel() != null) {
+                Log.i("Place3", String.valueOf(cur.getPriceLevel()));
+
+                if (cur.getPriceLevel() == 0) holder.price.setText("Price Level: Lowest Price");
+                else if (cur.getPriceLevel() == 1) holder.price.setText("Price Level: Inexpensive");
+                else if (cur.getPriceLevel() == 2) holder.price.setText("Price Level: Moderate");
+                else if (cur.getPriceLevel() == 3) holder.price.setText("Price Level: Expensive");
+                else if (cur.getPriceLevel() == 4) holder.price.setText("Price Level: Very Expensive");
+                else holder.price.setText("Price Level: Unknown");
+            } else {
+                holder.price.setText("Price Level: Unknown");
+            }
+
+
+            //Phone
+            if (cur.getPhoneNumber() != null) {
+                holder.call.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void run() {
-                        photo.setImageBitmap(places[position].photos[finalI]);
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_DIAL);
+                        intent.setData(Uri.parse("tel:" + cur.getPhoneNumber()));
+                        startActivity(context, intent, null);
                     }
                 });
-
-
-                holder.photoList.addView(singleFrame);
+            } else {
+                holder.call.setVisibility(View.GONE);
             }
+
+            //Share
+            if (cur.getLatLng() != null) {
+                holder.share.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent intent = new Intent(Intent.ACTION_SEND);
+                        intent.setType("text/plain");
+                        intent.putExtra(Intent.EXTRA_TEXT, places[position].getLatLngString());
+                        startActivity(context, Intent.createChooser(intent, "Share location"), null);
+                    }
+                });
+            } else {
+                holder.share.setVisibility(View.GONE);
+            }
+
+
+            //Opening Hours
+            holder.addition.setText("");
+            holder.status.setText("Closed ");
+            holder.status.setTextColor(context.getResources().getColor(R.color.red));
+
+            if (cur.getCurrentOpeningHours() != null) {
+                OpeningHours openingHours = cur.getCurrentOpeningHours();
+                List<String> week = openingHours.getWeekdayText();
+
+                for (int i = 0; i < week.size(); i++) {
+                    Log.i("Weekday", week.get(i));
+                }
+
+                LocalDate currentDate = LocalDate.now();
+
+                Log.i("LocalDate", currentDate.toString());
+                // Lấy thông tin về thứ của hôm nay
+                DayOfWeek dayOfWeek = currentDate.getDayOfWeek();
+                int day = dayOfWeek.getValue() - 1;
+
+                Log.i("Today", week.get(day));
+
+                handlerTime(holder, week, day);
+            }
+
+            // Fetch Photos
+            holder.photoList.removeAllViews();
+            if (places[position].photos != null) {
+
+
+                Log.i("PhotoAdapter", position + " " + places[position].photos.length);
+
+                for (int i = 0; i < places[position].curLoad; i++) {
+                    final View singleFrame = LayoutInflater.from(context).inflate(R.layout.photo_item, null);
+                    ImageView photo = (ImageView) singleFrame.findViewById(R.id.photo);
+
+                    int finalI = i;
+                    ((MainActivity) context).runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            photo.setImageBitmap(places[position].photos[finalI]);
+                        }
+                    });
+
+
+                    holder.photoList.addView(singleFrame);
+                }
+            }
+
+
+            //holder.status.setText(places[position].getCurrentOpeningHours().toString());
+
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
-
-        //holder.status.setText(places[position].getCurrentOpeningHours().toString());
         return convertView;
     }
 

@@ -233,12 +233,13 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
     public void drawPolyline(String encodedPolyline, String distanceMeters, String durationSeconds,
                              JSONArray trafficArray) {
         try{
+            GlobalVariable.myMap.clear();
             //Decode the encodedPolyline
             List<LatLng> decodedPolyline = PolyUtil.decode(encodedPolyline);
 
 
 
-            PolylineOptions polylineOptions = new PolylineOptions();
+
 /*            for(int i = 0; i < trafficArray.length(); i++){
                 JSONObject traffic = trafficArray.getJSONObject(i);
                 int start = traffic.getInt("startPolylinePointIndex");
@@ -259,39 +260,50 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                 }
                 polylineOptions.color(color);
             }*/
-            for (LatLng point : decodedPolyline) {
+/*            for (LatLng point : decodedPolyline) {
                 polylineOptions.add(point);
-            }
+            }*/
+
+            Log.d("Traffic line", "Polyline size: " + decodedPolyline.size());
 
             for(int i = 0; i < trafficArray.length(); i++){
+                PolylineOptions polylineOptions = new PolylineOptions();
                 JSONObject traffic = trafficArray.getJSONObject(i);
                 int start = traffic.getInt("startPolylinePointIndex");
                 int end = traffic.getInt("endPolylinePointIndex");
-                String speed = traffic.getString("speed");
-                if(speed.equals("SLOW")){
-                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
-                            .color(Color.YELLOW);
+                if(start > decodedPolyline.size()){
+                    start = decodedPolyline.size() - 1;
                 }
-                else if(speed.equals("TRAFFIC_JAM")){
-                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
-                            .color(Color.RED);
-                }
-                else {
-                    polylineOptions.add(decodedPolyline.get(start), decodedPolyline.get(end))
-                            .color(Color.BLUE);
+                if(end > decodedPolyline.size()){
+                    end = decodedPolyline.size() - 1;
                 }
 
-                Log.d("Traffic", "Start: " + start + " | End: "+ end + " | Speed: " + speed);
+                String speed = traffic.getString("speed");
+                int color;
+                if(speed.equals("SLOW")){
+                    color = Color.YELLOW;
+                }
+                else if(speed.equals("TRAFFIC_JAM")){
+                    color = Color.RED;
+                }
+                else {
+                    color = Color.BLUE;
+                }
+                Log.d("Traffic", "Start: " + start + " | End: " + end + " | Speed: " + speed);
+
+                for(int j = start; j <= end; j++){
+                    polylineOptions.add(decodedPolyline.get(j)).color(color);
+                }
+
+                GlobalVariable.myMap.addPolyline(polylineOptions);
             }
 
             // Set properties for the polyline (e.g., color, width)
             //polylineOptions.width(10).color(Color.BLUE);
 
-            if(GlobalVariable.polyline != null){
-                GlobalVariable.polyline.remove();
-            }
 
-            GlobalVariable.polyline = GlobalVariable.myMap.addPolyline(polylineOptions);
+
+
             GlobalVariable.polyline.setClickable(true);
 
 

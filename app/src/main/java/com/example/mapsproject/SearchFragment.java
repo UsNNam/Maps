@@ -186,9 +186,14 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                 public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                     if (actionId == EditorInfo.IME_ACTION_DONE || (event.getAction() == KeyEvent.ACTION_DOWN && event.getKeyCode() == KeyEvent.KEYCODE_ENTER)) {
                         // Xử lý sự kiện khi nhấn phím "Done" trên bàn phím
-                        InputMethodManager imm = (InputMethodManager) mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(searchLocation.getWindowToken(), 0);
-                        callApiSearchText();
+                        try {
+                            InputMethodManager imm = (InputMethodManager) mainActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(searchLocation.getWindowToken(), 0);
+                            callApiSearchText();
+                        } catch (Exception e) {
+                            Log.e("Error Search Place: ", e.getMessage());
+                        }
+
 
                         return true; // true để báo hiệu rằng sự kiện đã được xử lý
                     }
@@ -199,54 +204,73 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     }
 
     private void callApiSearchText() {
-        PlaceInfo.stop();
-        String locationText = searchLocation.getText().toString();
-        Log.i("Places test", "callApiSearchText   1: " + locationText);
-        // Restrict the areas
-        Location currentLocation = googleMap.getMyLocation();
-        if (currentLocation == null) {
-            return;
-        } else {
-        }
-        LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS);
-        Log.i("Places test", "callApiSearchText   2: " + locationText);
-
-        final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(10).build();
-        Log.i("Places test", "callApiSearchText   3: " + locationText);
-
-        placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
-
-            Log.i("Places test", "callApiSearchText   4: " + locationText);
-
-            Place[] placeList = response.getPlaces().toArray(new Place[0]);
-            places = new PlaceInfo[placeList.length];
-            for (Place place : placeList) {
-
-                Log.i("Places test", "Place found: " + place.toString());
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        PlaceInfo placeInfo = new PlaceInfo(place, placesClient);
-                        places[response.getPlaces().indexOf(place)] = placeInfo;
-                    }
-                }).start();
+        try {
+            PlaceInfo.stop();
+            String locationText = searchLocation.getText().toString();
+            Log.i("Places test", "callApiSearchText   1: " + locationText);
+            // Restrict the areas
+            Location currentLocation = googleMap.getMyLocation();
+            if (currentLocation == null) {
+                return;
+            } else {
             }
-            CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS);
+            Log.i("Places test", "callApiSearchText   2: " + locationText);
 
-            PlaceInfo.adapter = adapter;
+            final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(10).build();
+            Log.i("Places test", "callApiSearchText   3: " + locationText);
 
-            mainActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    listView.setAdapter(adapter);
+            placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                try {
+                    Log.i("Places test", "callApiSearchText   4: " + locationText);
+
+                    Place[] placeList = response.getPlaces().toArray(new Place[0]);
+                    places = new PlaceInfo[placeList.length];
+                    for (Place place : placeList) {
+
+                        Log.i("Places test", "Place found: " + place.toString());
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    PlaceInfo placeInfo = new PlaceInfo(place, placesClient);
+                                    places[response.getPlaces().indexOf(place)] = placeInfo;
+                                } catch (Exception e) {
+                                    Log.e("Error Search Place API thread: ", e.getMessage());
+                                }
+
+                            }
+                        }).start();
+                    }
+                    CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
+
+                    PlaceInfo.adapter = adapter;
+
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                listView.setAdapter(adapter);
+                            }catch (Exception e){
+                                Log.e("Error set search place adapter: ", e.getMessage());
+                            }
+
+                        }
+                    });
+                    listViewSearchResult.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Log.e("Error Search Place API: ", e.getMessage());
                 }
+
+
+            }).addOnFailureListener((exception) -> {
+                Log.e("Places test", "Place not found: " + exception.getMessage());
             });
-            listViewSearchResult.setVisibility(View.VISIBLE);
-        }).addOnFailureListener((exception) -> {
-            Log.e("Places test", "Place not found: " + exception.getMessage());
-        });
+        }catch (Exception e){
+            Log.e("Error Search Place API: ", e.getMessage());}
+
     }
 
     private void enableMyLocation() {
