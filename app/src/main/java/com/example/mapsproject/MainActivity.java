@@ -28,6 +28,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.Objects;
+
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -40,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private float startY;
     FragmentTransaction ft;
     SearchFragment searchFragment;
+
+    PlaceDetailFragment placeDetailFragment = null;
 
     private ImageButton mapStyleButton;
     private LinearLayout mapSelector;
@@ -61,8 +65,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             destinationEditText = findViewById(R.id.destinationEditText);
             curContext = this;
             ft = getSupportFragmentManager().beginTransaction();
+            // Tạo và gắn searchFragment
             searchFragment = SearchFragment.newInstance("search_fragment");
-            ft.replace(R.id.searchFragment, searchFragment);
+            FragmentTransaction ftSearch = getSupportFragmentManager().beginTransaction();
+            ftSearch.replace(R.id.searchFragment, searchFragment);
+            ftSearch.commit();
+
+            // Tạo và gắn placeDetailFragment
+            placeDetailFragment = PlaceDetailFragment.newInstance("place_detail_fragment");
+            FragmentTransaction ftPlaceDetail = getSupportFragmentManager().beginTransaction();
+            ftPlaceDetail.replace(R.id.placeDetailFragment, placeDetailFragment);
+            ftPlaceDetail.commit();
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.hide(placeDetailFragment);
             ft.commit();
 
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -208,6 +224,42 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+    }
+
+    public void onMsgFromSearchToMain(String sender, PlaceInfo placeInfo) {
+        Log.i("sender", sender);
+        if (Objects.equals(sender, "SEARCH")) {
+            try {
+
+                Log.i("onMsgFromSearchToMain", "onMsgFromSearchToMain");
+
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.hide(searchFragment);
+                ft.commit();
+
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.show(placeDetailFragment);
+                ft.commit();
+
+                placeInfo.placeDetailFragment = placeDetailFragment;
+                placeDetailFragment.setPlaceInfo(placeInfo);
+            } catch (Exception e) {
+                Log.e("Error onMsgFromSearchToMain", e.getMessage());
+            }
+        }
+        if(Objects.equals(sender, "PlaceDetailFragment")){
+            try {
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.show(searchFragment);
+                ft.commit();
+
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.hide(placeDetailFragment);
+                ft.commit();
+            } catch (Exception e) {
+                Log.e("Error onMsgFromPlaceDetailToMain", e.getMessage());
+            }
+        }
     }
 
     private void setMapStyleSelected (View oldItem, View newItem) {

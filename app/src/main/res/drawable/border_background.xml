@@ -1,0 +1,11 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="2dp"
+                android:color="#EDE8E8" /> <!-- Thay đổi màu xám nhạt tại đây -->
+            <corners android:radius="8dp" /> <!-- Đặt radius tại đây, sửa đổi giá trị theo ý muốn của bạn -->
+        </shape>
+    </item>
+</layer-list>

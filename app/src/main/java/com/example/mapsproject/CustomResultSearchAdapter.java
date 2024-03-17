@@ -38,6 +38,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
@@ -59,14 +60,13 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     public static class ViewHolder {
         TextView name;
         TextView rating, totalRating;
-
+        LinearLayout layout;
         TextView price, status;
         LinearLayout photoList;
         RatingBar ratingBar;
         TextView addition;
 
         Button call, direct, share;
-        Button save;
     }
 
 
@@ -75,8 +75,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         String[] stringArray = new String[2];
         if (ActivityCompat.checkSelfPermission(context,
-                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
-        {
+                android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -104,7 +103,6 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     }
 
 
-
     @NonNull
     @SuppressLint("SetTextI18n")
     public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -126,9 +124,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 holder.call = (Button) convertView.findViewById(R.id.call);
                 holder.direct = (Button) convertView.findViewById(R.id.direct);
                 holder.share = (Button) convertView.findViewById(R.id.share);
-                holder.save = (Button) convertView.findViewById(R.id.save);
-
-
+                holder.layout = (LinearLayout) convertView.findViewById(R.id.linearLayout);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -143,12 +139,22 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                         Log.d("LatLng String2", result);
                         routeActivity.displayRoute(result, places[position].getLatLngString());
                     });
-
+                    LinearLayout searchLayout = ((MainActivity) context).findViewById(R.id.searchLayout);
+                    searchLayout.setVisibility(LinearLayout.GONE);
                     //Location location = GoogleMap.getMyLocation();
                 }
             });
 
             Place cur = places[position].place;
+
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MainActivity mainActivity = (MainActivity) context;
+                    Log.i("Placestest111111111", "Click");
+                    mainActivity.onMsgFromSearchToMain("SEARCH", places[position]);
+                }
+            });
 
             Log.i("Place1", cur.toString());
             Log.i("Place1", cur.getName());
@@ -171,7 +177,9 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 Log.i("Place2", String.valueOf(cur.getUserRatingsTotal()));
                 holder.totalRating.setText("(" + String.valueOf(cur.getUserRatingsTotal()) + ")");
             }
-
+//        for(Review review: Objects.requireNonNull(cur.getReviews())){
+//            Log.i("Reviewsss",review.toString());
+//        }
             //Price Level
             if (cur.getPriceLevel() != null) {
                 Log.i("Place3", String.valueOf(cur.getPriceLevel()));
@@ -180,12 +188,12 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 else if (cur.getPriceLevel() == 1) holder.price.setText("Price Level: Inexpensive");
                 else if (cur.getPriceLevel() == 2) holder.price.setText("Price Level: Moderate");
                 else if (cur.getPriceLevel() == 3) holder.price.setText("Price Level: Expensive");
-                else if (cur.getPriceLevel() == 4) holder.price.setText("Price Level: Very Expensive");
+                else if (cur.getPriceLevel() == 4)
+                    holder.price.setText("Price Level: Very Expensive");
                 else holder.price.setText("Price Level: Unknown");
             } else {
                 holder.price.setText("Price Level: Unknown");
             }
-
 
             //Phone
             if (cur.getPhoneNumber() != null) {
@@ -202,14 +210,14 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
             }
 
             //Share
-            if (cur.getLatLng() != null) {
+            if (cur.getWebsiteUri() != null) {
                 holder.share.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         Intent intent = new Intent(Intent.ACTION_SEND);
                         intent.setType("text/plain");
-                        intent.putExtra(Intent.EXTRA_TEXT, places[position].getLatLngString());
-                        startActivity(context, Intent.createChooser(intent, "Share location"), null);
+                        intent.putExtra(Intent.EXTRA_TEXT, cur.getWebsiteUri().toString());
+                        startActivity(context, Intent.createChooser(intent, "Share"), null);
                     }
                 });
             } else {
@@ -249,7 +257,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
 
                 Log.i("PhotoAdapter", position + " " + places[position].photos.length);
 
-                for (int i = 0; i < places[position].curLoad; i++) {
+                for (int i = 0; i < places[position].photos.length; i++) {
                     final View singleFrame = LayoutInflater.from(context).inflate(R.layout.photo_item, null);
                     ImageView photo = (ImageView) singleFrame.findViewById(R.id.photo);
 
@@ -265,13 +273,18 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                     holder.photoList.addView(singleFrame);
                 }
             }
+            return convertView;
 
-
-            //holder.status.setText(places[position].getCurrentOpeningHours().toString());
-
-        }catch (Exception e){
-            e.printStackTrace();
+        } catch (Exception e) {
+            Log.i("Exception", e.toString() + " " + e.getMessage());
+            if (places[position].photos != null) {
+                Log.i("Exception", position + " " + places[position].photos.length);
+            } else {
+                Log.i("Exception", "null");
+            }
         }
+
+        //holder.status.setText(places[position].getCurrentOpeningHours().toString());
         return convertView;
     }
 

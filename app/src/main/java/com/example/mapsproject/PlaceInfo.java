@@ -6,20 +6,17 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ImageView;
 
-import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,6 +31,8 @@ public class PlaceInfo {
         placeInfoList = new ArrayList<>();
     }
 
+    public PlaceInfo thisOne= null;
+    public PlaceDetailFragment placeDetailFragment = null;
     public boolean stopInner = false;
     public static MainActivity mainActivity;
     public static CustomResultSearchAdapter adapter;
@@ -43,6 +42,7 @@ public class PlaceInfo {
     public int curLoad = 0;
 
     public PlaceInfo(Place place, PlacesClient placesClient) {
+        thisOne = this;
         Log.i("DetailInfo", place.toString());
         placeInfoList.add(this);
         this.place = place;
@@ -90,6 +90,7 @@ public class PlaceInfo {
 
         // Thay thế "API_KEY" bằng khóa API của bạn và "PLACE_ID_TO_QUERY" bằng ID của địa điểm cụ thể bạn muốn lấy thông tin
         String apiKey = "AIzaSyC4eQTS4oxvsgONLXCsbeBFUp68WhXYTJ0";
+
         String placeId = place.getId();
 
         // Xây dựng URL của API
@@ -123,7 +124,7 @@ public class PlaceInfo {
 
                 // Duyệt qua từng đối tượng JSON trong mảng "photos"
                 photos = new Bitmap[photosArray.size()];
-                ExecutorService executor = Executors.newFixedThreadPool(5); // Số lượng thread tối đa là 5
+                ExecutorService executor = Executors.newFixedThreadPool(32); // Số lượng thread tối đa là 5
 
                 for (int i = 0; i < photosArray.size(); i++) {
                     int finalI = i;
@@ -149,6 +150,10 @@ public class PlaceInfo {
                                 mainActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
+                                        if (placeDetailFragment != null) {
+                                            Log.i("abcxyz", "run: " + placeDetailFragment);
+                                            placeDetailFragment.loadImage(thisOne);
+                                        }
                                         adapter.notifyDataSetChanged();
                                     }
                                 });

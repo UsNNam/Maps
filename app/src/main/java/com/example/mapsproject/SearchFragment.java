@@ -61,7 +61,10 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private Context context;
     private LinearLayout listViewSearchResult;
     private Button backButton;
+    private Place[] placeList;
+
     String apiKey;
+
 
     public static SearchFragment newInstance(String strArg1) {
         SearchFragment fragment = new SearchFragment();
@@ -109,6 +112,9 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                PlaceInfo placeInfo = places[position];
+                Log.i("Placestest111111111", "Place selected: " + position);
+                mainActivity.onMsgFromSearchToMain("SEARCH", placeInfo);
             }
         });
 
@@ -215,7 +221,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             } else {
             }
             LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS);
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
             Log.i("Places test", "callApiSearchText   2: " + locationText);
 
             final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(10).build();
@@ -225,7 +231,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                 try {
                     Log.i("Places test", "callApiSearchText   4: " + locationText);
 
-                    Place[] placeList = response.getPlaces().toArray(new Place[0]);
+                    placeList = response.getPlaces().toArray(new Place[0]);
                     places = new PlaceInfo[placeList.length];
                     for (Place place : placeList) {
 
@@ -235,8 +241,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                             @Override
                             public void run() {
                                 try {
-                                    PlaceInfo placeInfo = new PlaceInfo(place, placesClient);
-                                    places[response.getPlaces().indexOf(place)] = placeInfo;
+                                    places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
                                 } catch (Exception e) {
                                     Log.e("Error Search Place API thread: ", e.getMessage());
                                 }
@@ -253,7 +258,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                         public void run() {
                             try {
                                 listView.setAdapter(adapter);
-                            }catch (Exception e){
+                            } catch (Exception e) {
                                 Log.e("Error set search place adapter: ", e.getMessage());
                             }
 
@@ -268,8 +273,9 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             }).addOnFailureListener((exception) -> {
                 Log.e("Places test", "Place not found: " + exception.getMessage());
             });
-        }catch (Exception e){
-            Log.e("Error Search Place API: ", e.getMessage());}
+        } catch (Exception e) {
+            Log.e("Error Search Place API: ", e.getMessage());
+        }
 
     }
 
