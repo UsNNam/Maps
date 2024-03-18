@@ -62,11 +62,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GridView mapTypeGrid;
     private GridView mapDetailGrid;
     private final String[] mapTypes = {"Default", "Satellite", "Terrain"};
-    private final String[] mapDetails = {"Traffic"};
+    private final String[] mapDetails = {"Traffic", "3D view"};
     private final Integer[] typeThumbnails = {R.drawable.default_map_type, R.drawable.satellite_map_type, R.drawable.terrain_map_type};
-    private final Integer[] detailThumbnails = {R.drawable.traffic_map_detail};
+    private final Integer[] detailThumbnails = {R.drawable.traffic_map_detail, R.drawable.threed_map_detail};
     private int currentMapStyle = 0;
-    private boolean[] mapDetailList = {false};
+    private boolean[] mapDetailList = {false, false};
     private FusedLocationProviderClient fusedLocationProviderClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -211,7 +211,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
                 } else {
                     googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                    googleMap.setBuildingsEnabled(true);
+                }
+                if (position != 0 && mapDetailList[1]) {
+                    googleMap.setBuildingsEnabled(false);
+                    mapDetailList[1] = false;
+                    setMapStyleSelected(mapDetailGrid.getChildAt(1), null);
                 }
                 View oldItem = mapTypeGrid.getChildAt(currentMapStyle);
                 currentMapStyle = position;
@@ -230,6 +234,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
                     } else {
                         googleMap.setTrafficEnabled(false);
+                        mapDetailList[position] = false;
+                        setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
+                    }
+                else if (position == 1)
+                    if (!mapDetailList[position]) {
+                        if (currentMapStyle != 0)
+                        {
+                            Toast.makeText(MainActivity.this, "3D view only available in default map style", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        googleMap.setBuildingsEnabled(true);
+                        mapDetailList[position] = true;
+                        setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
+                    } else {
+                        googleMap.setBuildingsEnabled(false);
                         mapDetailList[position] = false;
                         setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
                     }
@@ -296,26 +315,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapClick(@NonNull LatLng latLng) {
-//        PolylineOptions polylineOptions = new PolylineOptions()
-//                .add(new LatLng(-34, 151))
-//                .add(new LatLng(-33, 150))
-//                .add(new LatLng(-33, 152))
-//                .width(10) // set the width of the polyline
-//                .color(Color.BLUE); // set the color of the polyline
-//
-//        GlobalVariable.myMap.addPolyline(polylineOptions);
-        if (GlobalVariable.myMap != null && GlobalVariable.LocationHistory.size() > 1) {
-            Toast.makeText(this, "map clicked", Toast.LENGTH_SHORT).show();
-            PolylineOptions polylineOptions = new PolylineOptions()
-                    .addAll(GlobalVariable.LocationHistory)
-                    .color(Color.BLUE)
-                    .width(15);
 
-            if (GlobalVariable.locationHistoryLine != null) {
-                GlobalVariable.locationHistoryLine.remove();
-            }
-            GlobalVariable.locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
-        }
     }
 
     private void getDeviceLocation() {
