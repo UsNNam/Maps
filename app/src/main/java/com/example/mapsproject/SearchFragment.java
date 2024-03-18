@@ -293,6 +293,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         this.googleMap = googleMap;
+        GlobalVariable.myMap = googleMap;
         enableMyLocation();
         googleMap.setOnMyLocationButtonClickListener(this);
         googleMap.setOnMyLocationClickListener(this);

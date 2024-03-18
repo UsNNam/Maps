@@ -2,10 +2,14 @@ package com.example.mapsproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
@@ -19,19 +23,26 @@ import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.mapsproject.Entity.TravelMode;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.Objects;
 
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     EditText destinationEditText;
     Context curContext;
@@ -41,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int expandedHeight;
     private float startY;
     FragmentTransaction ft;
-    SearchFragment searchFragment;
+    SearchFragment searchFragment = null;
 
     PlaceDetailFragment placeDetailFragment = null;
 
@@ -56,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final Integer[] detailThumbnails = {R.drawable.traffic_map_detail};
     private int currentMapStyle = 0;
     private boolean[] mapDetailList = {false};
-
+    private FusedLocationProviderClient fusedLocationProviderClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
@@ -120,10 +131,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mapTypeGrid = (GridView) findViewById(R.id.mapTypeGrid);
             mapDetailGrid = (GridView) findViewById(R.id.mapDetailGrid);
 
+            fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+            startService(new Intent(this, LocationHistory.class));
         } catch (Exception e) {
             Log.e("Error Main Activity", e.getMessage());
         }
-
     }
 
     private void expandBottomSheet() {
@@ -138,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
-        GlobalVariable.myMap = googleMap;
+//        GlobalVariable.myMap = googleMap;
         LatLng sydney = new LatLng(10.761214, 106.682071);
         googleMap.addMarker(new MarkerOptions()
                 .position(sydney)
@@ -224,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         });
 
+        googleMap.setOnMapClickListener(this);
     }
 
     public void onMsgFromSearchToMain(String sender, PlaceInfo placeInfo) {
@@ -279,4 +292,69 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             oldLabel.setTextColor(Color.BLACK);
         }
     }
+
+
+    @Override
+    public void onMapClick(@NonNull LatLng latLng) {
+//        PolylineOptions polylineOptions = new PolylineOptions()
+//                .add(new LatLng(-34, 151))
+//                .add(new LatLng(-33, 150))
+//                .add(new LatLng(-33, 152))
+//                .width(10) // set the width of the polyline
+//                .color(Color.BLUE); // set the color of the polyline
+//
+//        GlobalVariable.myMap.addPolyline(polylineOptions);
+        if (GlobalVariable.myMap != null && GlobalVariable.LocationHistory.size() > 1) {
+            Toast.makeText(this, "map clicked", Toast.LENGTH_SHORT).show();
+            PolylineOptions polylineOptions = new PolylineOptions()
+                    .addAll(GlobalVariable.LocationHistory)
+                    .color(Color.BLUE)
+                    .width(15);
+
+            if (GlobalVariable.locationHistoryLine != null) {
+                GlobalVariable.locationHistoryLine.remove();
+            }
+            GlobalVariable.locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
+        }
+    }
+
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                    android.Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            Location lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(lastKnownLocation.getLatitude(),
+                                                lastKnownLocation.getLongitude()), 15));
+                            }
+                            else {
+                                Toast.makeText(MainActivity.this, "Result is null", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.d("test", "Current location is null. Using defaults.");
+                            Log.e("test", "Exception: %s", task.getException());
+                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(new LatLng(0,0), 15));
+                            GlobalVariable.myMap.getUiSettings().setMyLocationButtonEnabled(false);
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
+    }
+
 }

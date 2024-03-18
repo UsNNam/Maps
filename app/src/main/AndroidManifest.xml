@@ -25,7 +25,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/api_key" />
 
+        <service android:name=".LocationHistory" />
 
     </application>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 </manifest>
