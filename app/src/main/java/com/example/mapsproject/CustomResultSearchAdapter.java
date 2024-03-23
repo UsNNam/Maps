@@ -47,7 +47,6 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
-    private FusedLocationProviderClient fusedLocationClient;
 
     public CustomResultSearchAdapter(Context context, int layoutToBeInflated, PlaceInfo[] places, PlacesClient placesClient) {
         super(context, layoutToBeInflated, places);
@@ -56,21 +55,9 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         Log.i("CustomResultSearchAdapter", "Constructor");
 
     }
-
-    public static class ViewHolder {
-        TextView name;
-        TextView rating, totalRating;
-        LinearLayout layout;
-        TextView price, status;
-        LinearLayout photoList;
-        RatingBar ratingBar;
-        TextView addition;
-
-        Button call, direct, share;
-    }
-
-
-    private CompletableFuture<String> getLastLocation() {
+    static public CompletableFuture<String> getLastLocation(
+                                                     Context context) {
+        FusedLocationProviderClient fusedLocationClient;
         CompletableFuture<String> future = new CompletableFuture<>();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         String[] stringArray = new String[2];
@@ -101,6 +88,21 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 });
         return future;
     }
+
+
+    public static class ViewHolder {
+        TextView name;
+        TextView rating, totalRating;
+        LinearLayout layout;
+        TextView price, status;
+        LinearLayout photoList;
+        RatingBar ratingBar;
+        TextView addition;
+
+        Button call, direct, share;
+    }
+
+
 
 
     @NonNull
@@ -135,7 +137,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 public void onClick(View v) {
                     Log.d("LatLng String1", places[position].getLatLngString());
                     RouteActivity routeActivity = new RouteActivity(context);
-                    getLastLocation().thenAccept(result -> {
+                    getLastLocation(context).thenAccept(result -> {
                         Log.d("LatLng String2", result);
                         routeActivity.displayRoute(result, places[position].getLatLngString());
                     });

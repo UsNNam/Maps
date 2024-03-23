@@ -1,5 +1,7 @@
 package com.example.mapsproject;
 
+import static com.example.mapsproject.CustomResultSearchAdapter.getLastLocation;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -119,6 +121,7 @@ public class PlaceDetailFragment extends Fragment {
                 mainActivity.onMsgFromSearchToMain("PlaceDetailFragment", null);
             }
         });
+
 
         directAddress.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -343,6 +346,28 @@ public class PlaceDetailFragment extends Fragment {
         } else {
             descriptionLayout.setVisibility(View.GONE);
         }
+
+        direct.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    Log.d("LatLng String1", placeInfo.getLatLngString());
+                    RouteActivity routeActivity = new RouteActivity(context);
+
+                    getLastLocation(context).thenAccept(result -> {
+                        Log.d("LatLng String2", result);
+                        routeActivity.displayRoute(result, placeInfo.getLatLngString());
+                    });
+                    LinearLayout searchLayout = ((MainActivity) context).findViewById(R.id.searchLayout);
+                    searchLayout.setVisibility(LinearLayout.GONE);
+                    //Location location = GoogleMap.getMyLocation();
+                    Toast.makeText(context, "Direct to the place", Toast.LENGTH_SHORT).show();
+                }catch (Exception e){
+                    Log.e("ErrorDirectButton", e.toString());
+                }
+
+            }
+        });
 
 
         //status.setText(places[position].getCurrentOpeningHours().toString());
