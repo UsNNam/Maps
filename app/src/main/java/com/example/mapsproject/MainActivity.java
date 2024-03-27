@@ -26,6 +26,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mapsproject.Entity.TravelMode;
+import com.example.mapsproject.Fragment.SoloPhotoFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -68,10 +69,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int currentMapStyle = 0;
     private boolean[] mapDetailList = {false, false};
     private FusedLocationProviderClient fusedLocationProviderClient;
+
+    private SoloPhotoFragment soloPhotoFragment = null;
+    public Bundle myBundle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
+
             super.onCreate(savedInstanceState);
+            myBundle = savedInstanceState;
             setContentView(R.layout.activity_main);
             destinationEditText = findViewById(R.id.destinationEditText);
             curContext = this;
@@ -88,12 +95,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             ftPlaceDetail.replace(R.id.placeDetailFragment, placeDetailFragment);
             ftPlaceDetail.commit();
 
+            // Tạo và gắn soloPhotoFragment
+            soloPhotoFragment = SoloPhotoFragment.newInstance("solo_Photo_fragment");
+            ftPlaceDetail = getSupportFragmentManager().beginTransaction();
+            ftPlaceDetail.replace(R.id.soloPhotoFragment, soloPhotoFragment);
+            ftPlaceDetail.commit();
+
+
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.hide(placeDetailFragment);
             ft.commit();
 
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.map);
+
+            ft = getSupportFragmentManager().beginTransaction();
+            ft.hide(soloPhotoFragment);
+            ft.commit();
+
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
 
@@ -152,9 +170,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap googleMap) {
 //        GlobalVariable.myMap = googleMap;
         LatLng sydney = new LatLng(10.761214, 106.682071);
-        googleMap.addMarker(new MarkerOptions()
-                .position(sydney)
-                .title("Marker in Sydney"));
+        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         // Zoom in the Google Map, people don't need to zoom in manually
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
@@ -203,8 +219,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapTypeGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == currentMapStyle)
-                    return;
+                if (position == currentMapStyle) return;
                 if (position == 1) {
                     googleMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 } else if (position == 2) {
@@ -227,31 +242,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mapDetailGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (position == 0)
-                    if (!mapDetailList[position]) {
-                        googleMap.setTrafficEnabled(true);
-                        mapDetailList[position] = true;
-                        setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
-                    } else {
-                        googleMap.setTrafficEnabled(false);
-                        mapDetailList[position] = false;
-                        setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
+                if (position == 0) if (!mapDetailList[position]) {
+                    googleMap.setTrafficEnabled(true);
+                    mapDetailList[position] = true;
+                    setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
+                } else {
+                    googleMap.setTrafficEnabled(false);
+                    mapDetailList[position] = false;
+                    setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
+                }
+                else if (position == 1) if (!mapDetailList[position]) {
+                    if (currentMapStyle != 0) {
+                        Toast.makeText(MainActivity.this, "3D view only available in default map style", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                else if (position == 1)
-                    if (!mapDetailList[position]) {
-                        if (currentMapStyle != 0)
-                        {
-                            Toast.makeText(MainActivity.this, "3D view only available in default map style", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        googleMap.setBuildingsEnabled(true);
-                        mapDetailList[position] = true;
-                        setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
-                    } else {
-                        googleMap.setBuildingsEnabled(false);
-                        mapDetailList[position] = false;
-                        setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
-                    }
+                    googleMap.setBuildingsEnabled(true);
+                    mapDetailList[position] = true;
+                    setMapStyleSelected(null, mapDetailGrid.getChildAt(position));
+                } else {
+                    googleMap.setBuildingsEnabled(false);
+                    mapDetailList[position] = false;
+                    setMapStyleSelected(mapDetailGrid.getChildAt(position), null);
+                }
             }
         });
 
@@ -279,7 +291,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.e("Error onMsgFromSearchToMain", e.getMessage());
             }
         }
-        if(Objects.equals(sender, "PlaceDetailFragment")){
+        if (Objects.equals(sender, "PlaceDetailFragment")) {
             try {
                 ft = getSupportFragmentManager().beginTransaction();
                 ft.show(searchFragment);
@@ -292,9 +304,44 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.e("Error onMsgFromPlaceDetailToMain", e.getMessage());
             }
         }
+
+        if (Objects.equals(sender, "SoloPhotoFragmentOff")) {
+            try {
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.show(placeDetailFragment);
+                ft.commit();
+
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.hide(soloPhotoFragment);
+                ft.commit();
+            } catch (Exception e) {
+                Log.e("Error onMsgFromPlaceDetailToMain", e.getMessage());
+            }
+        }
+
     }
 
-    private void setMapStyleSelected (View oldItem, View newItem) {
+    public void onMsgFromSearchToMain(String sender, PlaceInfo placeInfo, int indexPhoto) {
+        if (Objects.equals(sender, "SoloPhotoFragmentOn")) {
+            try {
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.show(soloPhotoFragment);
+                ft.commit();
+
+                ft = getSupportFragmentManager().beginTransaction();
+                ft.hide(placeDetailFragment);
+                ft.commit();
+
+                soloPhotoFragment.setPicture(placeInfo.photoUrl[indexPhoto]);
+
+            } catch (Exception e) {
+                Log.e("Error onMsgFromPlaceDetailToMain", e.getMessage());
+            }
+        }
+    }
+
+
+    private void setMapStyleSelected(View oldItem, View newItem) {
         if (newItem != null) {
             LinearLayout newBorder = (LinearLayout) newItem.findViewById(R.id.itemBorder);
             TextView newLabel = (TextView) newItem.findViewById(R.id.label);
@@ -324,9 +371,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
          * cases when a location is not available.
          */
         try {
-            if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
-                    android.Manifest.permission.ACCESS_FINE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
                 locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
                     @Override
@@ -335,24 +380,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             // Set the map's camera position to the current location of the device.
                             Location lastKnownLocation = task.getResult();
                             if (lastKnownLocation != null) {
-                                GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                        new LatLng(lastKnownLocation.getLatitude(),
-                                                lastKnownLocation.getLongitude()), 15));
-                            }
-                            else {
+                                GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude()), 15));
+                            } else {
                                 Toast.makeText(MainActivity.this, "Result is null", Toast.LENGTH_SHORT).show();
                             }
                         } else {
                             Log.d("test", "Current location is null. Using defaults.");
                             Log.e("test", "Exception: %s", task.getException());
-                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(new LatLng(0,0), 15));
+                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0, 0), 15));
                             GlobalVariable.myMap.getUiSettings().setMyLocationButtonEnabled(false);
                         }
                     }
                 });
             }
-        } catch (SecurityException e)  {
+        } catch (SecurityException e) {
             Log.e("Exception: %s", e.getMessage(), e);
         }
     }

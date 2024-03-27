@@ -39,6 +39,7 @@ public class PlaceInfo {
     public Place place;
     public Bitmap[] photos = null;
 
+    public String[] photoUrl = null;
     public int curLoad = 0;
 
     public PlaceInfo(Place place, PlacesClient placesClient) {
@@ -124,6 +125,7 @@ public class PlaceInfo {
 
                 // Duyệt qua từng đối tượng JSON trong mảng "photos"
                 photos = new Bitmap[photosArray.size()];
+                photoUrl = new String[photosArray.size()];
                 ExecutorService executor = Executors.newFixedThreadPool(32); // Số lượng thread tối đa là 5
 
                 for (int i = 0; i < photosArray.size(); i++) {
@@ -141,6 +143,10 @@ public class PlaceInfo {
 
                             // Sử dụng giá trị photoReference theo ý của bạn
                             Log.i("PhotoNamexyz", name);
+
+                            String apiUrl = "https://places.googleapis.com/v1/" + name + "/media?key=" + apiKey + "&maxHeightPx=300&maxWidthPx=300";
+                            photoUrl[finalI] = apiUrl;
+
                             Bitmap photo = callGooglePlacesMediaApi(name, apiKey);
 
                             if (photo != null) {
@@ -176,9 +182,9 @@ public class PlaceInfo {
 
     public static Bitmap callGooglePlacesMediaApi(String name, String apiKey) {
         OkHttpClient client = new OkHttpClient();
+        String apiUrl = "https://places.googleapis.com/v1/" + name + "/media?key=" + apiKey + "&maxHeightPx=300&maxWidthPx=300";
 
         // Xây dựng URL của API
-        String apiUrl = "https://places.googleapis.com/v1/" + name + "/media?key=" + apiKey + "&maxHeightPx=300&maxWidthPx=300";
         Log.i("URLxxx", apiUrl);
 
         // Tạo một HTTP request
