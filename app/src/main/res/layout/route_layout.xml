@@ -136,17 +136,17 @@
                     android:textColor="@color/black" />
 
                 <Button
-                    android:id="@+id/directionByTransit"
+                    android:id="@+id/taxiPriceButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
                     android:layout_marginEnd="10dp"
                     android:backgroundTint="@android:color/white"
-                    android:drawableLeft="@drawable/transit"
+                    android:drawableLeft="@drawable/taxi"
                     android:foreground="@drawable/button_selector"
                     android:paddingStart="10dp"
                     android:paddingEnd="10dp"
-                    android:text="18 min"
+                    android:text="Taxi price"
                     android:textColor="@color/black" />
             </LinearLayout>
         </RelativeLayout>

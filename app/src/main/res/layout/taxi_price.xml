@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Create me a TextView show the price -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        tools:ignore="MissingConstraints">
+        <TextView
+            android:id="@+id/priceTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Taxi Price"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingVertical="16dp"
+            android:paddingHorizontal="24dp"
+            android:textColor="@color/white"
+            android:drawablePadding="10dp"
+            android:drawableStart="@drawable/taxi"
+            android:background="@drawable/textview_border_background_blue"
+            android:drawableEnd="@drawable/money"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center"/>
+        <ListView
+            android:id="@+id/priceListView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="#C3C3C3"
+            android:dividerHeight="1dp" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

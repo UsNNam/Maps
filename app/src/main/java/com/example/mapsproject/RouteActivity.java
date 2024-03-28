@@ -1,12 +1,16 @@
 package com.example.mapsproject;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Context;
+import android.content.Intent;
 import android.view.KeyEvent;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
+import com.example.mapsproject.TaxiActivity;
 import com.example.mapsproject.Entity.TravelMode;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -21,7 +25,7 @@ public class RouteActivity {
 
     Button directionByCar;
     Button directionByMotor;
-    Button directionByTransit;
+    Button taxiPriceButton;
 
 
     public RouteActivity(Context context) {
@@ -32,10 +36,10 @@ public class RouteActivity {
         startLocationEditText = mainActivity.findViewById(R.id.startLocationEditText);
         endLocationEditText = mainActivity.findViewById(R.id.destinationEditText);
         backButtonDirection = mainActivity.findViewById(R.id.backButtonDirection);
+        taxiPriceButton = mainActivity.findViewById(R.id.taxiPriceButton);
 
         directionByCar = mainActivity.findViewById(R.id.directionByCar);
         directionByMotor = mainActivity.findViewById(R.id.directionByMotor);
-        directionByTransit = mainActivity.findViewById(R.id.directionByTransit);
 
         backButtonDirection.setOnClickListener(v -> {
             routeLayout.setVisibility(LinearLayout.GONE);
@@ -50,8 +54,9 @@ public class RouteActivity {
             new HttpRequestTask(context, TravelMode.MOTOR).execute();
         });
 
-        directionByTransit.setOnClickListener(v -> {
-            new HttpRequestTask(context, TravelMode.TRANSIT).execute();
+        taxiPriceButton.setOnClickListener( v -> {
+            Intent intent = new Intent(mainActivity, TaxiActivity.class);
+            startActivity(context, intent,null);
         });
     }
 

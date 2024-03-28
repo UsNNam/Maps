@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Maps Project</string>
     <string name="api_key">AIzaSyC4eQTS4oxvsgONLXCsbeBFUp68WhXYTJ0</string>
+    <string name="title_activity_taxi">TaxiActivity</string>
 </resources>
