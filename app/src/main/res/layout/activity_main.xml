@@ -67,10 +67,15 @@
         <FrameLayout
             android:id="@+id/searchFragment"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <FrameLayout
             android:id="@+id/placeDetailFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <FrameLayout
+            android:id="@+id/soloPhotoFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 

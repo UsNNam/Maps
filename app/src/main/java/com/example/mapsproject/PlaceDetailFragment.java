@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -22,9 +23,11 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.mapsproject.CustomAdapter.CustomReviewAdapter;
 import com.google.android.libraries.places.api.model.OpeningHours;
 import com.google.android.libraries.places.api.model.Period;
+import com.google.android.libraries.places.api.model.PhotoMetadata;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.model.Review;
 
@@ -350,7 +353,7 @@ public class PlaceDetailFragment extends Fragment {
         direct.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                try{
+                try {
                     Log.d("LatLng String1", placeInfo.getLatLngString());
                     RouteActivity routeActivity = new RouteActivity(context);
 
@@ -362,7 +365,7 @@ public class PlaceDetailFragment extends Fragment {
                     searchLayout.setVisibility(LinearLayout.GONE);
                     //Location location = GoogleMap.getMyLocation();
                     Toast.makeText(context, "Direct to the place", Toast.LENGTH_SHORT).show();
-                }catch (Exception e){
+                } catch (Exception e) {
                     Log.e("ErrorDirectButton", e.toString());
                 }
 
@@ -449,17 +452,35 @@ public class PlaceDetailFragment extends Fragment {
 
     public void loadImage(PlaceInfo placeInfo) {
         Log.i("loadImage", " " + placeInfo.photos.length);
+
+        List<PhotoMetadata> photoMetadata = placeInfo.place.getPhotoMetadatas();
+        for (int i = 0; i < photoMetadata.size(); i++) {
+            Log.i("PhotoMetadataxxxxxx", photoMetadata.get(i).toString());
+        }
+
         for (int i = 0; i < placeInfo.curLoad; i++) {
             final View singleFrame = LayoutInflater.from(context).inflate(R.layout.photo_large_item, null);
             ImageView photo = (ImageView) singleFrame.findViewById(R.id.photo);
+
 
             int finalI = i;
             ((MainActivity) context).runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    photo.setImageBitmap(placeInfo.photos[finalI]);
+                    Glide.with(context)
+                            .load(placeInfo.photoUrl[finalI])
+                            .into(photo);
                 }
             });
+
+            int finalI1 = i;
+            photo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mainActivity.onMsgFromSearchToMain("SoloPhotoFragmentOn", placeInfo, finalI1);
+                }
+            });
+
             photoList.addView(singleFrame);
         }
     }
