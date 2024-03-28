@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.mapsproject.TaxiActivity;
 import com.example.mapsproject.Entity.TravelMode;
@@ -27,6 +28,8 @@ public class RouteActivity {
     Button directionByMotor;
     Button taxiPriceButton;
 
+    TextView summaryTextView;
+
 
     public RouteActivity(Context context) {
         this.context = context;
@@ -37,6 +40,7 @@ public class RouteActivity {
         endLocationEditText = mainActivity.findViewById(R.id.destinationEditText);
         backButtonDirection = mainActivity.findViewById(R.id.backButtonDirection);
         taxiPriceButton = mainActivity.findViewById(R.id.taxiPriceButton);
+        summaryTextView = mainActivity.findViewById(R.id.summaryTextView);
 
         directionByCar = mainActivity.findViewById(R.id.directionByCar);
         directionByMotor = mainActivity.findViewById(R.id.directionByMotor);
@@ -56,6 +60,10 @@ public class RouteActivity {
 
         taxiPriceButton.setOnClickListener( v -> {
             Intent intent = new Intent(mainActivity, TaxiActivity.class);
+            String routeInfo = summaryTextView.getText().toString();
+            String[] routeInfoArr = routeInfo.split(" km");
+
+            intent.putExtra("distance", Double.parseDouble(routeInfoArr[0]));
             startActivity(context, intent,null);
         });
     }
