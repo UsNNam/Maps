@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <item
+            android:id="@+id/navigation_shop"
+            android:icon="@drawable/khampha"
+            android:title="Home"
+            android:iconTint="@color/iconnavigationcolor"
+           />
+
+        <item
+            android:id="@+id/navigation_gifts"
+            android:icon="@drawable/bookmark"
+            android:title="Save" />
+
+        <item
+            android:id="@+id/navigation_cart"
+            android:icon="@drawable/bell"
+            android:title="Noti" />
+
+        <item
+            android:id="@+id/navigation_profile"
+            android:icon="@drawable/khampha"
+            android:title="Chua biet" />
+
+</menu>
+

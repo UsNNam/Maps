@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -22,6 +23,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,11 +36,14 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.Objects;
 
@@ -73,6 +78,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SoloPhotoFragment soloPhotoFragment = null;
     public Bundle myBundle;
 
+    SavePlaceFragment savePlaceFragment;
+    RelativeLayout homeLayout;
+    private Marker markerAdded;
+    private SavePlace sp;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
@@ -154,7 +163,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } catch (Exception e) {
             Log.e("Error Main Activity", e.getMessage());
         }
+
+        BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        homeLayout = (RelativeLayout) findViewById(R.id.home);
+        navigation.setSelectedItemId(R.id.navigation_shop);
     }
+
 
     private void expandBottomSheet() {
         bottomSheet.getLayoutParams().height = expandedHeight;
@@ -268,6 +283,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         googleMap.setOnMapClickListener(this);
+        sp = new SavePlace("test");
+        sp.setMarkOnMap(googleMap);
+        googleMap.setOnPoiClickListener(new GoogleMap.OnPoiClickListener() {
+            @Override
+            public void onPoiClick(PointOfInterest poi) {
+                if (markerAdded == null)
+                {
+                    markerAdded = GlobalVariable.myMap.addMarker(new MarkerOptions()
+                            .position(poi.latLng)
+                            .title(poi.name));
+
+                    markerAdded.showInfoWindow();
+                }
+                else
+                {
+                    markerAdded.remove();
+                    markerAdded=null;
+                }
+
+            }
+        });
+
     }
 
     public void onMsgFromSearchToMain(String sender, PlaceInfo placeInfo) {
@@ -362,7 +399,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onMapClick(@NonNull LatLng latLng) {
+        if (markerAdded == null )
+        {
 
+            markerAdded= GlobalVariable.myMap.addMarker(new MarkerOptions().position(latLng).title("New Marker"));
+        }
+        else
+        {
+            markerAdded.remove();
+            markerAdded=null;
+        }
+        // Hiển thị thông tin tọa độ latLng lên log hoặc UI
+        Log.i("MapClick", "Lat: " + latLng.latitude + ", Long: " + latLng.longitude);
     }
 
     private void getDeviceLocation() {
@@ -397,5 +445,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.e("Exception: %s", e.getMessage(), e);
         }
     }
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+//            Fragment fragment;
+
+
+            int itemId = item.getItemId();
+            if (itemId == R.id.navigation_shop) {
+                homeLayout.setVisibility(View.VISIBLE);
+                return true;
+            } else if (itemId == R.id.navigation_gifts) {
+                homeLayout.setVisibility(View.GONE);
+                Toast.makeText(curContext, "Search button selected2", Toast.LENGTH_SHORT).show();
+                ft = getSupportFragmentManager().beginTransaction();
+                savePlaceFragment = SavePlaceFragment.newInstance("save_fragment");
+                ft.replace(R.id.fragment_container, savePlaceFragment);
+                ft.commit();
+
+                return true;
+            } else if (itemId == R.id.navigation_cart) {
+                Toast.makeText(curContext, "Search button selected3", Toast.LENGTH_SHORT).show();
+                return true;
+            } else if (itemId == R.id.navigation_profile) {
+                Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+            return false;
+        }
+    };
+
 
 }

@@ -6,16 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/fragment_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent" />
+
+    <RelativeLayout
+        android:id="@+id/home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
         <fragment
             android:id="@+id/map"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
-    </RelativeLayout>
+
 
 
     <LinearLayout
@@ -35,8 +42,6 @@
             android:layout_height="wrap_content"
             android:background="@drawable/round_top_corner"
             android:orientation="vertical">
-
-
         </LinearLayout>
 
         <View
@@ -78,18 +83,38 @@
             android:id="@+id/soloPhotoFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
-
-        <ImageButton
-            android:id="@+id/mapStyleButton"
-            android:layout_width="46dp"
-            android:layout_height="50dp"
-            android:layout_gravity="right"
-            android:layout_marginTop="16dp"
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp"
             android:layout_marginRight="10dp"
-            android:background="@drawable/round_button"
-            android:padding="16dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/layer" />
+            android:layout_marginLeft="10dp">
+            <ImageButton
+                android:layout_width="60dp"
+                android:layout_height="50dp"
+                android:id = "@+id/weatherBtn"
+                android:src="@drawable/clear_large"
+                android:scaleType="fitCenter"
+                android:padding="8dp"
+                tools:ignore="MissingConstraints"
+                android:background="@drawable/weatherbtn"
+                ></ImageButton>
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1"/>
+            <ImageButton
+                android:id="@+id/mapStyleButton"
+                android:layout_width="46dp"
+                android:layout_height="50dp"
+                android:background="@drawable/round_button"
+                android:padding="16dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/layer"
+                />
+            </LinearLayout>
     </LinearLayout>
 
     <FrameLayout
@@ -112,5 +137,18 @@
         <include layout="@layout/map_style_selector" />
 
     </LinearLayout>
+    </RelativeLayout>
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/white"
+        app:itemIconTint="@color/iconnavigationcolor"
+        app:itemTextColor="@color/iconnavigationcolor"
+        app:menu="@menu/bottomnavigation"
+        tools:ignore="MissingConstraints"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
