@@ -10,17 +10,28 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LocationHistory extends Service {
     private static final String TAG = "LocationService";
-    private static final long INTERVAL = 3 * 1000;
+    private static final long INTERVAL = 5 * 60 * 1000;
     private Handler handler;
+    FirebaseFirestore db;
+    CollectionReference colRef;
 
     @Nullable
     @Override
@@ -31,6 +42,8 @@ public class LocationHistory extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        this.db= FirebaseFirestore.getInstance();
+        this.colRef = db.collection("LocationHistory");
         handler = new Handler(Looper.getMainLooper());
         handler.postDelayed(locationRunnable, INTERVAL);
     }
@@ -51,10 +64,28 @@ public class LocationHistory extends Service {
             return;
         }
         Location currentLocation = GlobalVariable.myMap.getMyLocation();
-        Calendar currentTime = Calendar.getInstance();
+//        Calendar currentTime = Calendar.getInstance();
         if (currentLocation != null) {
             GlobalVariable.LocationHistory.add(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
-            Log.d(TAG, currentTime.get(Calendar.DAY_OF_MONTH) + "/" + currentTime.get(Calendar.MONTH) + 1 + "/" + currentTime.get(Calendar.YEAR)+ " " + currentTime.get(Calendar.HOUR_OF_DAY) + ":" + currentTime.get(Calendar.MINUTE) + " : " + currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("Latitude", currentLocation.getLatitude());
+            data.put("Longtitude", currentLocation.getLongitude());
+            data.put("DateTime", new Date());
+
+            colRef.add(data)
+                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                        @Override
+                        public void onSuccess(DocumentReference documentReference) {
+                            Log.d(TAG, "Document added with ID: " + documentReference.getId());
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.w(TAG, "Error adding document");
+                        }
+                    });
         }
         else {
             Log.d(TAG, "current location is null");

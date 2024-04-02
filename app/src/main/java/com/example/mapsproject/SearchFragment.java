@@ -35,13 +35,21 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -62,7 +70,8 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private LinearLayout listViewSearchResult;
     private Button backButton;
     private Place[] placeList;
-
+    private FirebaseFirestore db;
+    private CollectionReference colRef;
     String apiKey;
 
 
@@ -83,6 +92,10 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         PlaceInfo.mainActivity = mainActivity;
         // Define a variable to hold the Places API key.
         apiKey = getResources().getString(R.string.api_key);
+
+        //define firebase variables
+        this.db= FirebaseFirestore.getInstance();
+        this.colRef = db.collection("SearchHistory");
 
         // Log an error if apiKey is not set.
         if (TextUtils.isEmpty(apiKey) || apiKey.equals("DEFAULT_API_KEY")) {
@@ -242,6 +255,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                             public void run() {
                                 try {
                                     places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
+                                    saveToDatabase(place);
                                 } catch (Exception e) {
                                     Log.e("Error Search Place API thread: ", e.getMessage());
                                 }
@@ -315,5 +329,26 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
+    }
+
+    private void saveToDatabase(Place place) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("PlaceId", place.getId());
+        data.put("Address", place.getAddress());
+        data.put("Name", place.getName());
+
+        colRef.add(data)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d("SearchHistory", "Document added with ID: " + documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d("SearchHistory", "Error adding document");
+                    }
+                });
     }
 }
