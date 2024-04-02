@@ -3,6 +3,7 @@ package com.example.mapsproject;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -276,8 +277,94 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         } catch (Exception e) {
             Log.e("Error Search Place API: ", e.getMessage());
         }
-
     }
+
+  /*  public class RetrieveLocationFromText extends AsyncTask<Void, Void, String> {
+        private String locationText;
+        private PlaceInfo[] places = null;
+
+        public RetrieveLocationFromText(String locationText, PlaceInfo[] places) {
+            this.locationText = locationText;
+            this.places = places;
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            try {
+                PlaceInfo.stop();
+                String locationText = searchLocation.getText().toString();
+                Log.i("Places test", "callApiSearchText   1: " + locationText);
+                // Restrict the areas
+                Location currentLocation = googleMap.getMyLocation();
+                if (currentLocation == null) {
+                    return;
+                } else {
+                }
+                LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+                final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
+                Log.i("Places test", "callApiSearchText   2: " + locationText);
+
+                final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(10).build();
+                Log.i("Places test", "callApiSearchText   3: " + locationText);
+
+                placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                    try {
+                        Log.i("Places test", "callApiSearchText   4: " + locationText);
+
+                        placeList = response.getPlaces().toArray(new Place[0]);
+                        places = new PlaceInfo[placeList.length];
+                        for (Place place : placeList) {
+
+                            Log.i("Places test", "Place found: " + place.toString());
+
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
+                                    } catch (Exception e) {
+                                        Log.e("Error Search Place API thread: ", e.getMessage());
+                                    }
+
+                                }
+                            }).start();
+                        }
+                        CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
+
+                        PlaceInfo.adapter = adapter;
+
+                        mainActivity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    listView.setAdapter(adapter);
+                                } catch (Exception e) {
+                                    Log.e("Error set search place adapter: ", e.getMessage());
+                                }
+
+                            }
+                        });
+                        listViewSearchResult.setVisibility(View.VISIBLE);
+                    } catch (Exception e) {
+                        Log.e("Error Search Place API: ", e.getMessage());
+                    }
+
+
+                }).addOnFailureListener((exception) -> {
+                    Log.e("Places test", "Place not found: " + exception.getMessage());
+                });
+            } catch (Exception e) {
+                Log.e("Error Search Place API: ", e.getMessage());
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+*/
 
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

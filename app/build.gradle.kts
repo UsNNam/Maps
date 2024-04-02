@@ -85,4 +85,6 @@ dependencies {
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest");
+    implementation ("com.github.chrisbanes:PhotoView:2.3.0");
+
 }
