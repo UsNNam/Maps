@@ -16,6 +16,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="60dp"
+            android:paddingEnd="15dp"
             android:autofillHints=""
             android:background="@drawable/textview_border"
             android:gravity="center_vertical|start"
@@ -146,6 +147,18 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <ImageButton
+                android:id="@+id/camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:padding="11dp"
+                android:src="@drawable/camera"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/camera_button_background"
+                />
 
             <LinearLayout
                 android:id="@+id/listViewSearchResult"

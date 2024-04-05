@@ -88,6 +88,6 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest");
     implementation ("com.github.chrisbanes:PhotoView:2.3.0");
     implementation ("com.squareup.okhttp3:okhttp:4.9.1");
-    annotationProcessor ("org.projectlombok:lombok:1.18.22")
-    implementation ("org.projectlombok:lombok:1.18.22")
+
+
 }

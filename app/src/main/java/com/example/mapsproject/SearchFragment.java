@@ -6,14 +6,20 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.media.Image;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -35,9 +41,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
 import com.example.mapsproject.BackGroundTask.OpenAIApi;
+import com.example.mapsproject.BackGroundTask.OpenAIVisionApiHandleImage;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -49,8 +57,14 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -75,9 +89,12 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private Place[] placeList;
     private final int REQ_CODE_SPEECH_INPUT = 100;
 
+    private ImageButton camera;
     private ImageButton mic;
     String apiKey;
 
+    static final int REQUEST_IMAGE_CAPTURE = 1;
+    String currentPhotoPath;
 
     public static SearchFragment newInstance(String strArg1) {
         SearchFragment fragment = new SearchFragment();
@@ -117,7 +134,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         LinearLayout search_fragment = (LinearLayout) inflater.inflate(R.layout.search_places, container, false);
 
-
         listViewSearchResult = (LinearLayout) search_fragment.findViewById(R.id.listViewSearchResult);
         listViewSearchResult.setVisibility(View.GONE);
         listView = (ListView) search_fragment.findViewById(R.id.listView);
@@ -149,6 +165,20 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             });
         } else {
             ActivityCompat.requestPermissions(mainActivity, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
+        }
+
+        camera = search_fragment.findViewById(R.id.camera);
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            camera.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    dispatchTakePictureIntent();
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(mainActivity, new String[]{android.Manifest.permission.CAMERA}, 1);
+            ActivityCompat.requestPermissions(mainActivity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+
         }
 
         // Button
@@ -196,6 +226,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         return search_fragment;
     }
 
+    // Mic Record
     private void askSpeechInput() {
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
@@ -212,6 +243,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     Toast.LENGTH_SHORT).show();
         }
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -223,17 +255,149 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
-                    String rawText= result.get(0);
+                    String rawText = result.get(0);
 
                     OpenAIApi openAIApi = new OpenAIApi(context, this);
                     openAIApi.execute(rawText);
-
                 }
                 break;
             }
+            case REQUEST_IMAGE_CAPTURE : {
+                if (resultCode == RESULT_OK) {
 
+                    // Ảnh đã được chụp thành công, tiến hành mã hóa và upload
+                    String encodedImage = resizeAndEncodeImage(currentPhotoPath);
+                    if (encodedImage != null) {
+                        // Tiến hành upload ảnh (sử dụng Retrofit, Volley, hoặc thư viện HTTP khác)
+                        // Ví dụ: myUploader.uploadImage(encodedImage);
+                        OpenAIVisionApiHandleImage openAIApi = new OpenAIVisionApiHandleImage(context, this);
+                        openAIApi.execute(encodedImage);
+                    }
+                }
+                break;
+            }
         }
     }
+
+    // Camera
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (takePictureIntent.resolveActivity(context.getPackageManager()) != null) {
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(context,
+                        "com.example.android.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+            }
+        }
+    }
+    private File createImageFile() throws IOException {
+        // Tạo tệp ảnh
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Lưu đường dẫn tệp ảnh
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
+    }
+
+    private String encodeImage(String imagePath) {
+        File imageFile = new File(imagePath);
+        try {
+            FileInputStream fileInputStream = new FileInputStream(imageFile);
+            byte[] bytes = new byte[(int) imageFile.length()];
+            fileInputStream.read(bytes);
+            fileInputStream.close();
+            return Base64.encodeToString(bytes, Base64.DEFAULT);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String compressBitmapFromFile(String filePath, int quality) {
+        // Đọc ảnh từ đường dẫn tệp vào một đối tượng Bitmap
+        Bitmap originalBitmap = BitmapFactory.decodeFile(filePath);
+
+        // Kiểm tra xem ảnh có tồn tại không
+        if (originalBitmap == null) {
+            return null; // Trả về null nếu không thể đọc được ảnh
+        }
+
+        // Tạo một ByteArrayOutputStream để lưu dữ liệu sau khi nén
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        // Nén ảnh với chất lượng được chỉ định và lưu vào ByteArrayOutputStream
+        originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
+
+        // Chuyển đổi ByteArrayOutputStream thành mảng byte
+        byte[] byteArray = byteArrayOutputStream.toByteArray();
+
+        // Mã hóa mảng byte thành chuỗi Base64
+        String base64Image = Base64.encodeToString(byteArray, Base64.DEFAULT);
+
+        return base64Image;
+    }
+
+    public static String resizeAndEncodeImage(String imagePath) {
+        // Đọc bức ảnh từ đường dẫn
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(imagePath, options);
+
+        // Tính toán tỉ lệ thu nhỏ
+        int scaleFactor = 1;
+        while ((options.outWidth / scaleFactor) > 2048
+                || (options.outHeight / scaleFactor) > 2048) {
+            scaleFactor *= 2;
+        }
+
+        // Tạo bitmap thu nhỏ
+        options.inJustDecodeBounds = false;
+        options.inSampleSize = scaleFactor;
+        Bitmap resizedBitmap = BitmapFactory.decodeFile(imagePath, options);
+
+        // Cắt ảnh ở giữa nếu cần
+        int width = resizedBitmap.getWidth();
+        int height = resizedBitmap.getHeight();
+        int x = 0;
+        int y = 0;
+
+        if (width > 1048) {
+            x = (width - 1048) / 2;
+            width = 1048;
+        }
+        if (height > 4048) {
+            y = (height - 4048) / 2;
+            height = 4048;
+        }
+        resizedBitmap = Bitmap.createBitmap(resizedBitmap, x, y, width, height);
+
+        // Chuyển bitmap thành chuỗi Base64
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        resizedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] byteArray = baos.toByteArray();
+        return Base64.encodeToString(byteArray, Base64.DEFAULT);
+    }
+
+
+
+
+
+
 
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {

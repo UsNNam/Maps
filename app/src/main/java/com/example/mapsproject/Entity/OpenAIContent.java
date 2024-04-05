@@ -1,10 +1,10 @@
 package com.example.mapsproject.Entity;
 
 
+
 public class OpenAIContent {
     String type;
     String text;
-
 
     public OpenAIContent() {
     }
