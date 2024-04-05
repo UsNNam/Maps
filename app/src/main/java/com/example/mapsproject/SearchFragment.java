@@ -1,10 +1,16 @@
 package com.example.mapsproject;
 
+import static android.app.Activity.RESULT_OK;
+
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.Image;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -18,6 +24,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -30,6 +37,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.example.mapsproject.BackGroundTask.OpenAIApi;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -41,8 +49,10 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -50,7 +60,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
 
     private GoogleMap googleMap;
 
-    private EditText searchLocation;
+    public EditText searchLocation;
 
     private PlacesClient placesClient;
 
@@ -63,7 +73,9 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private LinearLayout listViewSearchResult;
     private Button backButton;
     private Place[] placeList;
+    private final int REQ_CODE_SPEECH_INPUT = 100;
 
+    private ImageButton mic;
     String apiKey;
 
 
@@ -110,11 +122,12 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         listViewSearchResult.setVisibility(View.GONE);
         listView = (ListView) search_fragment.findViewById(R.id.listView);
 
+
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 PlaceInfo placeInfo = places[position];
-                Log.i("Placestest111111111", "Place selected: " + position);
+                Log.i("Placestest1111111", "Place selected: " + position);
                 mainActivity.onMsgFromSearchToMain("SEARCH", placeInfo);
             }
         });
@@ -123,6 +136,20 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         searchLocation = search_fragment.findViewById(R.id.search);
         searchLocation.addTextChangedListener(this);
         backButton = (Button) search_fragment.findViewById(R.id.back);
+
+        // Mic Record
+        mic = search_fragment.findViewById(R.id.mic);
+        if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+            mic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    askSpeechInput();
+
+                }
+            });
+        } else {
+            ActivityCompat.requestPermissions(mainActivity, new String[]{android.Manifest.permission.RECORD_AUDIO}, 1);
+        }
 
         // Button
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -169,6 +196,45 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         return search_fragment;
     }
 
+    private void askSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "vi-VN"); // Đặt ngôn ngữ thành tiếng Việt
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Nói đi"); // Hiển thị thông báo để người dùng biết khi nói
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                "Say something…");
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(context.getApplicationContext(),
+                    "Sorry! Your device doesn't support speech input",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+
+                    String rawText= result.get(0);
+
+                    OpenAIApi openAIApi = new OpenAIApi(context, this);
+                    openAIApi.execute(rawText);
+
+                }
+                break;
+            }
+
+        }
+    }
+
     @Override
     public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         // Code này sẽ được thực thi trước khi nội dung của EditText thay đổi
@@ -210,7 +276,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         }
     }
 
-    private void callApiSearchText() {
+    public void callApiSearchText() {
         try {
             PlaceInfo.stop();
             String locationText = searchLocation.getText().toString();
@@ -279,92 +345,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         }
     }
 
-  /*  public class RetrieveLocationFromText extends AsyncTask<Void, Void, String> {
-        private String locationText;
-        private PlaceInfo[] places = null;
-
-        public RetrieveLocationFromText(String locationText, PlaceInfo[] places) {
-            this.locationText = locationText;
-            this.places = places;
-        }
-
-        @Override
-        protected String doInBackground(Void... voids) {
-            try {
-                PlaceInfo.stop();
-                String locationText = searchLocation.getText().toString();
-                Log.i("Places test", "callApiSearchText   1: " + locationText);
-                // Restrict the areas
-                Location currentLocation = googleMap.getMyLocation();
-                if (currentLocation == null) {
-                    return;
-                } else {
-                }
-                LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-                final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
-                Log.i("Places test", "callApiSearchText   2: " + locationText);
-
-                final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(10).build();
-                Log.i("Places test", "callApiSearchText   3: " + locationText);
-
-                placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
-                    try {
-                        Log.i("Places test", "callApiSearchText   4: " + locationText);
-
-                        placeList = response.getPlaces().toArray(new Place[0]);
-                        places = new PlaceInfo[placeList.length];
-                        for (Place place : placeList) {
-
-                            Log.i("Places test", "Place found: " + place.toString());
-
-                            new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    try {
-                                        places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
-                                    } catch (Exception e) {
-                                        Log.e("Error Search Place API thread: ", e.getMessage());
-                                    }
-
-                                }
-                            }).start();
-                        }
-                        CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
-
-                        PlaceInfo.adapter = adapter;
-
-                        mainActivity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    listView.setAdapter(adapter);
-                                } catch (Exception e) {
-                                    Log.e("Error set search place adapter: ", e.getMessage());
-                                }
-
-                            }
-                        });
-                        listViewSearchResult.setVisibility(View.VISIBLE);
-                    } catch (Exception e) {
-                        Log.e("Error Search Place API: ", e.getMessage());
-                    }
-
-
-                }).addOnFailureListener((exception) -> {
-                    Log.e("Places test", "Place not found: " + exception.getMessage());
-                });
-            } catch (Exception e) {
-                Log.e("Error Search Place API: ", e.getMessage());
-            }
-        }
-
-
-        @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
-        }
-    }
-*/
 
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
