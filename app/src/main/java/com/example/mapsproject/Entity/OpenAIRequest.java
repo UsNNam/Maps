@@ -56,7 +56,7 @@ public class OpenAIRequest {
     private void initMessage() {
         times = 0;
         this.messages.clear();
-        addMessage("system", "Với toàn bộ các request của user gửi đến đều sẽ là những ngữ cảnh. Và bạn cần phải trả lời cho user duy nhất một địa điểm phù hợp với ngữ cảnh được đưa ra và nếu user có ghi thêm các thông tin bổ trợ về mặt địa lý thì hãy ghi lại những thông tin đó, còn lại thì hãy lược bỏ chúng. ví dụ các câu trả lời: thác nước, công viên, quán cà phê đường Phan Bội Châu,...");
+        addMessage("system", "Với toàn bộ các request của user gửi đến đều sẽ là những ngữ cảnh. Chỉ trả lời cho tôi duy nhất 1 danh từ là tên của địa điểm hoặc tên một thương hiệu ở Việt Nam phù hợp thông tin user gửi đến . ví dụ: công viên, khách sạn, trường Khoa Học Tự Nhiên,... So that i can get the text you send to me to search on google map");
         return;
     }
 

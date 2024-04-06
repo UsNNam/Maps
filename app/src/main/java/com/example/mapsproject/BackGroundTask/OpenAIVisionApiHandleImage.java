@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.mapsproject.Entity.OpenAIRequest;
 import com.example.mapsproject.Entity.OpenAIResponse;
@@ -74,7 +75,7 @@ public class OpenAIVisionApiHandleImage extends AsyncTask<String, Void, String> 
 
             JSONObject imageUrlObject = new JSONObject();
             imageUrlObject.put("url", "data:image/jpeg;base64," + encodeImage);
-            imageUrlObject.put("detail", "low");
+            imageUrlObject.put("detail", "high");
 
             contentObject.put("image_url", imageUrlObject);
             contentArray.put(contentObject);
@@ -144,8 +145,13 @@ public class OpenAIVisionApiHandleImage extends AsyncTask<String, Void, String> 
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
         progressDialog.dismiss();
-        searchFragment.searchLocation.setText(s);
-        searchFragment.callApiSearchText();
+        int numberOfSpace = s.split(" ").length;
+        if (numberOfSpace >= 5) {
+            Toast.makeText(context, "Không thể phát hiện được địa điểm từ ảnh cung cấp", Toast.LENGTH_LONG).show();
+        } else {
+            searchFragment.searchLocation.setText(s);
+            searchFragment.callApiSearchText();
+        }
     }
 
 }

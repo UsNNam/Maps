@@ -6,6 +6,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.Location;
@@ -70,6 +71,8 @@ import java.util.Locale;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int REQUEST_SELECT_IMAGE = 2;
+
     private boolean permissionDenied = false;
 
     private GoogleMap googleMap;
@@ -172,7 +175,9 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             camera.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    dispatchTakePictureIntent();
+
+                    selectImageFromGallery();
+
                 }
             });
         } else {
@@ -248,35 +253,80 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
+        try {
+            switch (requestCode) {
+                case REQ_CODE_SPEECH_INPUT: {
+                    if (resultCode == RESULT_OK && null != data) {
 
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                        ArrayList<String> result = data
+                                .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
-                    String rawText = result.get(0);
+                        String rawText = result.get(0);
 
-                    OpenAIApi openAIApi = new OpenAIApi(context, this);
-                    openAIApi.execute(rawText);
-                }
-                break;
-            }
-            case REQUEST_IMAGE_CAPTURE : {
-                if (resultCode == RESULT_OK) {
-
-                    // Ảnh đã được chụp thành công, tiến hành mã hóa và upload
-                    String encodedImage = resizeAndEncodeImage(currentPhotoPath);
-                    if (encodedImage != null) {
-                        // Tiến hành upload ảnh (sử dụng Retrofit, Volley, hoặc thư viện HTTP khác)
-                        // Ví dụ: myUploader.uploadImage(encodedImage);
-                        OpenAIVisionApiHandleImage openAIApi = new OpenAIVisionApiHandleImage(context, this);
-                        openAIApi.execute(encodedImage);
+                        OpenAIApi openAIApi = new OpenAIApi(context, this);
+                        openAIApi.execute(rawText);
                     }
+                    break;
                 }
-                break;
+                case REQUEST_IMAGE_CAPTURE: {
+                    if (resultCode == RESULT_OK) {
+
+                        // Ảnh đã được chụp thành công, tiến hành mã hóa và upload
+                        String encodedImage = resizeAndEncodeImage(currentPhotoPath);
+                        if (encodedImage != null) {
+                            // Tiến hành upload ảnh (sử dụng Retrofit, Volley, hoặc thư viện HTTP khác)
+                            // Ví dụ: myUploader.uploadImage(encodedImage);
+                            OpenAIVisionApiHandleImage openAIApi = new OpenAIVisionApiHandleImage(context, this);
+                            openAIApi.execute(encodedImage);
+                        }
+                    }
+                    break;
+                }
+                case REQUEST_SELECT_IMAGE: {
+                    if (resultCode == RESULT_OK && null != data) {
+
+                        Uri selectedImageUri = data.getData();
+                        currentPhotoPath = getAbsolutePath(selectedImageUri);
+// Ảnh đã được chụp thành công, tiến hành mã hóa và upload
+                        String encodedImage = resizeAndEncodeImage(currentPhotoPath);
+                        if (encodedImage != null) {
+                            // Tiến hành upload ảnh (sử dụng Retrofit, Volley, hoặc thư viện HTTP khác)
+                            // Ví dụ: myUploader.uploadImage(encodedImage);
+                            OpenAIVisionApiHandleImage openAIApi = new OpenAIVisionApiHandleImage(context, this);
+                            openAIApi.execute(encodedImage);
+                        }
+
+                    }
+                    break;
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+    }
+
+    private String getAbsolutePath(Uri uri) {
+        // Kiểm tra URI scheme
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            // Nếu là một URI content (thường từ trình quản lý file của hệ thống)
+            // Sử dụng phương thức getContentResolver().query() để lấy đường dẫn thực tế của tệp
+            String[] projection = {MediaStore.Images.Media.DATA};
+            Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+            if (cursor != null) {
+                int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+                if (cursor.moveToFirst()) {
+                    String filePath = cursor.getString(columnIndex);
+                    cursor.close();
+                    return filePath;
+                }
+                cursor.close();
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            // Nếu là một URI file (thường từ bộ nhớ đệm hoặc bộ nhớ trong)
+            // Lấy đường dẫn từ URI trực tiếp
+            return uri.getPath();
+        }
+        return null;
     }
 
     // Camera
@@ -294,10 +344,22 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                         "com.example.android.fileprovider",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                try {
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
+
+    private void selectImageFromGallery() {
+        // Tạo Intent để mở trình chọn ảnh
+        Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, REQUEST_SELECT_IMAGE);
+    }
+
+
     private File createImageFile() throws IOException {
         // Tạo tệp ảnh
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
@@ -312,44 +374,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         // Lưu đường dẫn tệp ảnh
         currentPhotoPath = image.getAbsolutePath();
         return image;
-    }
-
-    private String encodeImage(String imagePath) {
-        File imageFile = new File(imagePath);
-        try {
-            FileInputStream fileInputStream = new FileInputStream(imageFile);
-            byte[] bytes = new byte[(int) imageFile.length()];
-            fileInputStream.read(bytes);
-            fileInputStream.close();
-            return Base64.encodeToString(bytes, Base64.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static String compressBitmapFromFile(String filePath, int quality) {
-        // Đọc ảnh từ đường dẫn tệp vào một đối tượng Bitmap
-        Bitmap originalBitmap = BitmapFactory.decodeFile(filePath);
-
-        // Kiểm tra xem ảnh có tồn tại không
-        if (originalBitmap == null) {
-            return null; // Trả về null nếu không thể đọc được ảnh
-        }
-
-        // Tạo một ByteArrayOutputStream để lưu dữ liệu sau khi nén
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        // Nén ảnh với chất lượng được chỉ định và lưu vào ByteArrayOutputStream
-        originalBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream);
-
-        // Chuyển đổi ByteArrayOutputStream thành mảng byte
-        byte[] byteArray = byteArrayOutputStream.toByteArray();
-
-        // Mã hóa mảng byte thành chuỗi Base64
-        String base64Image = Base64.encodeToString(byteArray, Base64.DEFAULT);
-
-        return base64Image;
     }
 
     public static String resizeAndEncodeImage(String imagePath) {
@@ -371,7 +395,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         Bitmap resizedBitmap = BitmapFactory.decodeFile(imagePath, options);
 
         // Cắt ảnh ở giữa nếu cần
-        int width = resizedBitmap.getWidth();
+       /* int width = resizedBitmap.getWidth();
         int height = resizedBitmap.getHeight();
         int x = 0;
         int y = 0;
@@ -384,7 +408,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             y = (height - 4048) / 2;
             height = 4048;
         }
-        resizedBitmap = Bitmap.createBitmap(resizedBitmap, x, y, width, height);
+        resizedBitmap = Bitmap.createBitmap(resizedBitmap, x, y, width, height);*/
 
         // Chuyển bitmap thành chuỗi Base64
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -392,11 +416,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         byte[] byteArray = baos.toByteArray();
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
-
-
-
-
-
 
 
     @Override
