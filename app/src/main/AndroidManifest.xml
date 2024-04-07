@@ -22,6 +22,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MapsProject"
         tools:targetApi="31">
+        <activity
+            android:name=".Authentication.SignupActivity"
+            android:exported="true" />
+        <activity
+            android:name=".Authentication.LoginActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.android.fileprovider"
@@ -31,6 +44,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+
         <activity
             android:name=".TaxiActivity"
             android:exported="false"
@@ -39,11 +53,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
         <meta-data

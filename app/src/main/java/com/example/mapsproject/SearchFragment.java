@@ -53,10 +53,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,8 +71,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -95,6 +102,8 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private ImageButton camera;
     private ImageButton mic;
     String apiKey;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference docRef;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
@@ -116,6 +125,8 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         PlaceInfo.mainActivity = mainActivity;
         // Define a variable to hold the Places API key.
         apiKey = getResources().getString(R.string.api_key);
+
+        this.docRef = db.collection("SearchHistory").document(GlobalVariable.userName);
 
         // Log an error if apiKey is not set.
         if (TextUtils.isEmpty(apiKey) || apiKey.equals("DEFAULT_API_KEY")) {
@@ -482,6 +493,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     Log.i("Places test", "callApiSearchText   4: " + locationText);
 
                     placeList = response.getPlaces().toArray(new Place[0]);
+                    SaveToDatabase(placeList);
                     places = new PlaceInfo[placeList.length];
                     for (Place place : placeList) {
 
@@ -565,5 +577,63 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
+    }
+
+    private  void SaveToDatabase(Place[] placeList) {
+        String saveField = "SearchPlaces";
+        this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    ArrayList<String> placeArray = (ArrayList<String>) documentSnapshot.get(saveField);
+
+                    if (placeArray == null) {
+                        placeArray = new ArrayList<>();
+                    }
+                    for (Place place : placeList) {
+                        placeArray.add(place.getId());
+                    }
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put(saveField, placeArray);
+                    docRef.update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("SearchFragment", "Document updated successfully!");
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("SearchFragment", "Error updating document", e);
+                        }
+                    });
+                } else {
+                    Log.d("SearchFragment", "Document does not exist, create a new one");
+                    ArrayList<String> placeArray = new ArrayList<>();
+
+                    for (Place place : placeList) {
+                        placeArray.add(place.getId());
+                    }
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put(saveField, placeArray);
+
+                    // Tạo mới document
+                    docRef.set(data)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("SearchFragment", "Document created successfully!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("SearchFragment", "Error creating document", e);
+                                }
+                            });
+                }
+            }
+        });
     }
 }
