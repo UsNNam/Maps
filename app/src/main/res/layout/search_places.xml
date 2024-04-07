@@ -6,6 +6,9 @@
     android:orientation="vertical"
     tools:ignore="MissingConstraints">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         <EditText
             android:id="@+id/search"
             android:layout_width="match_parent"
@@ -13,6 +16,7 @@
             android:layout_marginStart="20dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="60dp"
+            android:paddingEnd="15dp"
             android:autofillHints=""
             android:background="@drawable/textview_border"
             android:gravity="center_vertical|start"
@@ -24,6 +28,21 @@
             android:textColor="#AFA4A4"
             android:textSize="17sp"
             tools:ignore="MissingConstraints" />
+
+        <ImageButton
+            android:id="@+id/mic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignTop="@+id/search"
+            android:layout_alignEnd="@+id/search"
+            android:layout_gravity="end|bottom"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="9dp"
+            android:backgroundTint="@color/white"
+            android:contentDescription="TODO"
+            android:src="@drawable/mic" />
+    </RelativeLayout>
+
 
         <HorizontalScrollView
             android:layout_width="match_parent"
@@ -128,6 +147,18 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
+            <ImageButton
+                android:id="@+id/camera"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:padding="11dp"
+                android:src="@drawable/camera"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/camera_button_background"
+                />
 
             <LinearLayout
                 android:id="@+id/listViewSearchResult"
