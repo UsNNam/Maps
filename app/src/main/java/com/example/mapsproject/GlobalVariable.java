@@ -11,6 +11,6 @@ public class GlobalVariable {
     public static Polyline polyline;
     public static Polyline locationHistoryLine;
     public  static ArrayList<LatLng> LocationHistory = new ArrayList<>();
-
+    public static String userName;
 
 }

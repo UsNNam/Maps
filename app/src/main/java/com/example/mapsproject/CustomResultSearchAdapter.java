@@ -1,5 +1,6 @@
 package com.example.mapsproject;
 
+import static android.content.ContentValues.TAG;
 import static androidx.core.content.ContextCompat.startActivity;
 
 import android.annotation.SuppressLint;
@@ -27,6 +28,7 @@ import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.model.OpeningHours;
 import com.google.android.libraries.places.api.model.Place;
@@ -44,7 +46,7 @@ import java.util.concurrent.CompletableFuture;
 public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     private final Context context;
     private final PlaceInfo[] places;
-
+    private SavePlace sp;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
 
 
@@ -53,7 +55,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         this.context = context;
         this.places = places;
         Log.i("CustomResultSearchAdapter", "Constructor");
-
+        sp = new SavePlace("test");
     }
     static public CompletableFuture<String> getLastLocation(
                                                      Context context) {
@@ -99,7 +101,7 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         RatingBar ratingBar;
         TextView addition;
 
-        Button call, direct, share;
+        Button call, direct, share, save;
     }
 
 
@@ -127,6 +129,8 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                 holder.direct = (Button) convertView.findViewById(R.id.direct);
                 holder.share = (Button) convertView.findViewById(R.id.share);
                 holder.layout = (LinearLayout) convertView.findViewById(R.id.linearLayout);
+
+                holder.save = (Button) convertView.findViewById(R.id.save);
                 convertView.setTag(holder);
             } else {
                 holder = (ViewHolder) convertView.getTag();
@@ -275,6 +279,27 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                     holder.photoList.addView(singleFrame);
                 }
             }
+            holder.save.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String[] geometry = places[position].getLatLngString().split(",", 2);
+                    Toast.makeText(context, geometry[0] + geometry[1], Toast.LENGTH_SHORT).show();
+//                sp = datasource.createSavePlace(Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]));
+                    if (v.isSelected()==false)
+                    {
+                        sp.addSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v) ;
+                    }
+                    else
+                    {
+                        sp.removeSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v);
+                    }
+                }
+            });
+
+            LatLng geo = cur.getLatLng();
+            Log.d(TAG, geo.latitude +" " + geo.longitude + "tim o day");
+            sp.setSelectedButton(geo,holder);
+
             return convertView;
 
         } catch (Exception e) {
