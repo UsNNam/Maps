@@ -28,6 +28,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mapsproject.Entity.TravelMode;
+import com.example.mapsproject.Fragment.SearchHistoryFragment;
 import com.example.mapsproject.Fragment.SoloPhotoFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -79,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public Bundle myBundle;
 
     SavePlaceFragment savePlaceFragment;
+    SearchHistoryFragment searchHistoryFragment;
     RelativeLayout homeLayout;
     private Marker markerAdded;
     private SavePlace sp;
@@ -470,7 +472,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(curContext, "Search button selected3", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.navigation_profile) {
+                homeLayout.setVisibility(View.GONE);
                 Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
+                ft = getSupportFragmentManager().beginTransaction();
+                searchHistoryFragment = SearchHistoryFragment.newInstance("search_history");
+                ft.replace(R.id.fragment_container, searchHistoryFragment);
+                ft.commit();
+
                 return true;
             }
             return false;
