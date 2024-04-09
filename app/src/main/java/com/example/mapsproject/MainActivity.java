@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     PlaceDetailFragment placeDetailFragment = null;
 
     private ImageButton mapStyleButton;
+    private ImageButton directionButton;
     private LinearLayout mapSelector;
     private ImageButton mapStyleClose;
     private GridView mapTypeGrid;
@@ -80,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             super.onCreate(savedInstanceState);
             myBundle = savedInstanceState;
             setContentView(R.layout.activity_main);
-            destinationEditText = findViewById(R.id.destinationEditText);
+
             curContext = this;
             ft = getSupportFragmentManager().beginTransaction();
             // Tạo và gắn searchFragment
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
-
+            destinationEditText = findViewById(R.id.destinationEditText);
             bottomSheet = findViewById(R.id.bottomSheet);
             originalHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_original_height);
             expandedHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_expanded_height);
@@ -141,6 +142,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return false;
                 }
             });
+
+            directionButton = (ImageButton) findViewById(R.id.directionButton);
 
             mapSelector = (LinearLayout) findViewById(R.id.mapStyleSelector);
             mapStyleButton = (ImageButton) findViewById(R.id.mapStyleButton);
@@ -187,6 +190,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return true; // Return true to consume the event
                 }
                 return false; // Return false to pass the event to other listeners
+            }
+        });
+
+        directionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    RouteActivity routeActivity = new RouteActivity(curContext);
+                    routeActivity.displayRouteInfo();
+
+                } catch (Exception e) {
+                    Log.e("Error HTTP", e.getMessage());
+                }
             }
         });
 

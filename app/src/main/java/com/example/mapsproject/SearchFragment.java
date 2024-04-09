@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -24,7 +25,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
@@ -40,8 +40,10 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -278,6 +280,96 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         }
 
     }
+    public void callApiSearchTextNew(String textToSearch, EditText editText, ListView suggestionsListView) {
+        try {
+            AtomicReference<List<Place>> placeListInfo = new AtomicReference<>(new ArrayList<>());
+            Log.i("Places test", "callApiSearchText   1: " + textToSearch);
+            // Restrict the areas
+            Location currentLocation = googleMap.getMyLocation();
+            if (currentLocation == null) {
+                return ;
+            } else {
+            }
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+            Log.i("Places test", "callApiSearchText   2: " + textToSearch);
+
+            final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(textToSearch, placeFields).setMaxResultCount(10).build();
+            Log.i("Places test", "callApiSearchText   3: " + textToSearch);
+
+            placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                try {
+                    Log.i("Places test", "callApiSearchText   4: " + textToSearch);
+
+                    placeListInfo.set(Arrays.asList(response.getPlaces().toArray(new Place[0])));
+
+                    List<Place> placeList = response.getPlaces();
+                    List<String> suggestions = new ArrayList<>();
+                    for (Place place : placeList) {
+                        Log.i("Places test 115", "Place found: " + place.toString());
+                        suggestions.add(place.getName() + " ( " + place.getAddress() + " )");
+                    }
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ArrayAdapter<String> adapter = new ArrayAdapter<>(mainActivity, android.R.layout.simple_list_item_1, suggestions);
+                                suggestionsListView.setAdapter(adapter);
+                                //adapter.notifyDataSetChanged();
+                                if (suggestions.size() > 0) {
+                                    suggestionsListView.setVisibility(ListView.VISIBLE);
+                                } else {
+                                    suggestionsListView.setVisibility(ListView.GONE);
+                                }
+
+                                suggestionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        try {
+                                            String locationLatLng = placeList.get(position).getLatLng().toString();
+                                            String locationLatLngProcessed = "";
+                                            if (locationLatLng.length() >= 3) {
+                                                String parts[] = locationLatLng.split("\\(");
+                                                if (parts.length >= 2) {
+                                                    String parts2[] = parts[1].split("\\)");
+                                                    locationLatLngProcessed = parts2[0];
+                                                }
+                                            } else {
+                                                Toast.makeText(mainActivity, "Location not found", Toast.LENGTH_SHORT).show();
+                                            }
+                                            Log.i("Placestest111111111", "Place selected: " + position);
+                                            editText.setText(locationLatLngProcessed);
+                                            suggestionsListView.setVisibility(ListView.GONE);
+
+                                        }catch (Exception e){
+                                            Log.e("Error Search Place API: ", String.valueOf(e));
+                                        }
+
+                                    }
+                                });
+
+                            } catch (Exception e) {
+                                Log.e("Error Search Place API: ", String.valueOf(e));
+                            }
+
+                        }
+                    });
+
+
+                } catch (Exception e) {
+                    Log.e("Error Search Place API: ", String.valueOf(e));
+                }
+
+            }).addOnFailureListener((exception) -> {
+                Log.e("Places test", "Place not found: " + exception);
+            });
+        } catch (Exception e) {
+            Log.e("Error Search Place API: ", String.valueOf(e));
+        }
+
+    }
+
+
 
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {

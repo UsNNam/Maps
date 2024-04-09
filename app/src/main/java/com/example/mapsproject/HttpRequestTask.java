@@ -39,8 +39,9 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
     Context context;
     EditText startLocationEditText;
     EditText destinationLocationEditText;
+    EditText waypointLocationEditText;
     String travelMode;
-    double lat1, lng1, lat2, lng2;
+    double lat1, lng1, lat2, lng2, lat3, lng3;
 
     public HttpRequestTask(Context context, TravelMode travelMode){
         this.context = context;
@@ -57,16 +58,39 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
         try {
             startLocationEditText = ((MainActivity) context).findViewById(R.id.startLocationEditText);
             destinationLocationEditText = ((MainActivity) context).findViewById(R.id.destinationEditText);
+            waypointLocationEditText = ((MainActivity) context).findViewById(R.id.wayPointEditText);
 
             // Get the latitude and longitude of the start location
             String[] startLocationParts = startLocationEditText.getText().toString().split(",");
-            lat1 = Double.parseDouble(startLocationParts[0]);
-            lng1 = Double.parseDouble(startLocationParts[1]);
+            if(startLocationParts.length >= 2){
+                lat1 = Double.parseDouble(startLocationParts[0]);
+                lng1 = Double.parseDouble(startLocationParts[1]);
+            }
 
             // Get the latitude and longitude of the destination location
             String[] destinationLocationParts = destinationLocationEditText.getText().toString().split(",");
-            lat2 = Double.parseDouble(destinationLocationParts[0]);
-            lng2 = Double.parseDouble(destinationLocationParts[1]);
+            if(destinationLocationParts.length >= 2){
+                lat2 = Double.parseDouble(destinationLocationParts[0]);
+                lng2 = Double.parseDouble(destinationLocationParts[1]);
+            }
+
+
+            // Get the latitude and longitude of the waypoint location
+            String[] waypointLocationParts = waypointLocationEditText.getText().toString().split(",");
+
+            if(waypointLocationParts.length >= 2){
+                lat3 = Double.parseDouble(waypointLocationParts[0]);
+                lng3 = Double.parseDouble(waypointLocationParts[1]);
+            }
+
+            String waypointString = "";
+            if(lat3 != 0 && lng3 != 0){
+                waypointString = String.format("\"intermediates\":[{\"location\":{" +
+                        "\"latLng\":{\"latitude\":%s,\"longitude\":%s}}" +
+                                ", \"via\": true}],"
+                        , lat3, lng3);
+            }
+
 
             /*GlobalVariable.myMap.addMarker(new MarkerOptions()
                     .position(new LatLng(lat2, lng2))
@@ -79,7 +103,7 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                     "{\"latLng\":" +
                     "{\"latitude\": %s ,\"longitude\":%s}}}," +
                     "\"destination\":{\"location\":{\"latLng\":" +
-                    "{\"latitude\":%s,\"longitude\":%s}}}," +
+                    "{\"latitude\":%s,\"longitude\":%s}}}," + waypointString +
                     "\"travelMode\": \"%s\", \"extraComputations\": [\"TRAFFIC_ON_POLYLINE\"]," +
                     "\"routingPreference\":\"TRAFFIC_AWARE\"," +
                     "\"departureTime\":\"2024-10-15T15:01:23.045123456Z\"," +
