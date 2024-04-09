@@ -2,6 +2,7 @@ package com.example.mapsproject.Authentication;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Application;
 import android.os.Bundle;
 
 import com.example.mapsproject.GlobalVariable;
@@ -21,6 +22,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mapsproject.SessionManager;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,15 +44,23 @@ public class LoginActivity extends AppCompatActivity {
     TextView signupRedirectText;
     Button loginButton;
 
+    SessionManager session;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        session = new SessionManager(getApplicationContext());
         loginUsername = findViewById(R.id.loginUsername);
         loginPassword = findViewById(R.id.loginPassword);
         loginButton = findViewById(R.id.loginButton);
         signupRedirectText = findViewById(R.id.signupRedirectText);
+
+        if (session.isLoggedIn()) {
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            GlobalVariable.userName = session.getUsername();
+            startActivity(intent);
+        }
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
                     if(Objects.equals(passwordFromDB, userPassword)) {
                         loginUsername.setError(null);
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        session.setLogin(true, userUsername);
                         GlobalVariable.userName = userUsername;
                         startActivity(intent);
                     } else {
