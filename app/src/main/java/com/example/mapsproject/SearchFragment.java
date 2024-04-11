@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -39,7 +40,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -73,6 +73,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.Locale;
 import java.util.Map;
 
@@ -539,6 +540,96 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             Log.e("Error Search Place API: ", e.getMessage());
         }
     }
+    public void callApiSearchTextNew(String textToSearch, EditText editText, ListView suggestionsListView) {
+        try {
+            AtomicReference<List<Place>> placeListInfo = new AtomicReference<>(new ArrayList<>());
+            Log.i("Places test", "callApiSearchText   1: " + textToSearch);
+            // Restrict the areas
+            Location currentLocation = googleMap.getMyLocation();
+            if (currentLocation == null) {
+                return ;
+            } else {
+            }
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+            Log.i("Places test", "callApiSearchText   2: " + textToSearch);
+
+            final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(textToSearch, placeFields).setMaxResultCount(10).build();
+            Log.i("Places test", "callApiSearchText   3: " + textToSearch);
+
+            placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                try {
+                    Log.i("Places test", "callApiSearchText   4: " + textToSearch);
+
+                    placeListInfo.set(Arrays.asList(response.getPlaces().toArray(new Place[0])));
+
+                    List<Place> placeList = response.getPlaces();
+                    List<String> suggestions = new ArrayList<>();
+                    for (Place place : placeList) {
+                        Log.i("Places test 115", "Place found: " + place.toString());
+                        suggestions.add(place.getName() + " ( " + place.getAddress() + " )");
+                    }
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ArrayAdapter<String> adapter = new ArrayAdapter<>(mainActivity, android.R.layout.simple_list_item_1, suggestions);
+                                suggestionsListView.setAdapter(adapter);
+                                //adapter.notifyDataSetChanged();
+                                if (suggestions.size() > 0) {
+                                    suggestionsListView.setVisibility(ListView.VISIBLE);
+                                } else {
+                                    suggestionsListView.setVisibility(ListView.GONE);
+                                }
+
+                                suggestionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        try {
+                                            String locationLatLng = placeList.get(position).getLatLng().toString();
+                                            String locationLatLngProcessed = "";
+                                            if (locationLatLng.length() >= 3) {
+                                                String parts[] = locationLatLng.split("\\(");
+                                                if (parts.length >= 2) {
+                                                    String parts2[] = parts[1].split("\\)");
+                                                    locationLatLngProcessed = parts2[0];
+                                                }
+                                            } else {
+                                                Toast.makeText(mainActivity, "Location not found", Toast.LENGTH_SHORT).show();
+                                            }
+                                            Log.i("Placestest111111111", "Place selected: " + position);
+                                            editText.setText(locationLatLngProcessed);
+                                            suggestionsListView.setVisibility(ListView.GONE);
+
+                                        }catch (Exception e){
+                                            Log.e("Error Search Place API: ", String.valueOf(e));
+                                        }
+
+                                    }
+                                });
+
+                            } catch (Exception e) {
+                                Log.e("Error Search Place API: ", String.valueOf(e));
+                            }
+
+                        }
+                    });
+
+
+                } catch (Exception e) {
+                    Log.e("Error Search Place API: ", String.valueOf(e));
+                }
+
+            }).addOnFailureListener((exception) -> {
+                Log.e("Places test", "Place not found: " + exception);
+            });
+        } catch (Exception e) {
+            Log.e("Error Search Place API: ", String.valueOf(e));
+        }
+
+    }
+
+
 
 
     private void enableMyLocation() {
