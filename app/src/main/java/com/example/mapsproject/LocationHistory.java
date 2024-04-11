@@ -72,6 +72,7 @@ public class LocationHistory extends Service {
         Location currentLocation = GlobalVariable.myMap.getMyLocation();
         Calendar currentTime = Calendar.getInstance();
         if (currentLocation != null) {
+            GlobalVariable.LocationHistory.add(new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude()));
             String saveField = "History";
             this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override

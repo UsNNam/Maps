@@ -20,16 +20,23 @@
             android:src="@drawable/back"
             />
         <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="Favorite place"
             android:textAlignment="center"
             android:gravity="center"
-            android:layout_marginRight="40dp"
+            android:layout_weight="1"
             android:textFontWeight="700"
             android:textSize="18dp"
             ></TextView>
-
+        <ImageButton
+            android:id = "@+id/historyBtn"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/history"
+            />
 
     </LinearLayout>
     <ListView

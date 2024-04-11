@@ -379,7 +379,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-
     private void setMapStyleSelected(View oldItem, View newItem) {
         if (newItem != null) {
             LinearLayout newBorder = (LinearLayout) newItem.findViewById(R.id.itemBorder);
@@ -397,7 +396,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             oldLabel.setTextColor(Color.BLACK);
         }
     }
-
 
     @Override
     public void onMapClick(@NonNull LatLng latLng) {
@@ -485,5 +483,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     };
 
-
+    public void showLocationHistory() {
+        homeLayout.setVisibility(View.VISIBLE);
+    }
 }

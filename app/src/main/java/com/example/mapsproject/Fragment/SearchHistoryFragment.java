@@ -79,7 +79,7 @@ public class SearchHistoryFragment extends Fragment {
                     ArrayList<String> placeArray = (ArrayList<String>) documentSnapshot.get(saveField);
 
                     if (placeArray != null) {
-                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, placeArray);
+                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, reverseArrayList(placeArray));
                         historyList.setAdapter(adapter);
                     }
 
@@ -91,4 +91,19 @@ public class SearchHistoryFragment extends Fragment {
 
         return layout;
     }
+
+    public ArrayList<String> reverseArrayList(ArrayList<String> alist)
+    {
+        // Arraylist for storing reversed elements
+        ArrayList<String> revArrayList = new ArrayList<String>();
+        for (int i = alist.size() - 1; i >= 0; i--) {
+
+            // Append the elements in reverse order
+            revArrayList.add(alist.get(i));
+        }
+
+        // Return the reversed arraylist
+        return revArrayList;
+    }
+
 }

@@ -26,6 +26,7 @@ import java.util.Locale;
 public class SavePlaceFragment extends Fragment {
     MainActivity main;
     ImageButton back;
+    ImageButton history;
     CustomSavePlaceAdapter adapter;
     ListView listfavoriteplace;
     private Context context;
@@ -53,6 +54,15 @@ public class SavePlaceFragment extends Fragment {
         LinearLayout save_place_layout =  (LinearLayout) inflater.inflate(R.layout.saveplace_fragment, null);
         back = (ImageButton) save_place_layout.findViewById(R.id.backButton);
         listfavoriteplace = (ListView) save_place_layout.findViewById(R.id.listfavoriteplace);
+        history = (ImageButton) save_place_layout.findViewById(R.id.historyBtn);
+
+        history.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(context, "location history clicked", Toast.LENGTH_SHORT).show();
+                main.showLocationHistory();
+            }
+        });
         Geocoder geocoder = new Geocoder(main, Locale.getDefault());
         List<Address> addresses = null;
         Toast.makeText(context, "chay trong nay", Toast.LENGTH_SHORT).show();

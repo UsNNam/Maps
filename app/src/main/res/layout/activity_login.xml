@@ -76,6 +76,7 @@
         android:layout_marginTop="24dp"
         android:background="@drawable/primary_btn"
         android:textStyle="bold"
+        app:backgroundTint="@null"
         android:textSize="18dp"
         android:textColor="@color/white"
         android:padding="10dp"
