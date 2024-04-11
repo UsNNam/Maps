@@ -26,6 +26,7 @@ public class CustomSavePlaceAdapter extends ArrayAdapter<Address>
     Context context;
     Address[] address;
 
+
     public CustomSavePlaceAdapter(Context context, int layoutToBeInflated, List<Address> addresses)
     {
         super(context, layoutToBeInflated, addresses);

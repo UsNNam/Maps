@@ -1,10 +1,30 @@
 {
   "project_info": {
     "project_number": "626559660909",
+    "firebase_url": "https://nice-ripple-415614-default-rtdb.firebaseio.com",
     "project_id": "nice-ripple-415614",
     "storage_bucket": "nice-ripple-415614.appspot.com"
   },
   "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:626559660909:android:77d5b527bac667d1bd6064",
+        "android_client_info": {
+          "package_name": "com.example.loginsignup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmYebm3Pb639dJexVGt5aywsDYRGWVElo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:626559660909:android:016e2a8d4f7b65acbd6064",

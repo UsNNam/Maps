@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -39,7 +40,6 @@ import android.widget.TextView.OnEditorActionListener;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -53,10 +53,15 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,8 +71,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.Locale;
+import java.util.Map;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
@@ -95,6 +103,8 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private ImageButton camera;
     private ImageButton mic;
     String apiKey;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference docRef;
 
     static final int REQUEST_IMAGE_CAPTURE = 1;
     String currentPhotoPath;
@@ -116,6 +126,8 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         PlaceInfo.mainActivity = mainActivity;
         // Define a variable to hold the Places API key.
         apiKey = getResources().getString(R.string.api_key);
+
+        this.docRef = db.collection("SearchHistory").document(GlobalVariable.userName);
 
         // Log an error if apiKey is not set.
         if (TextUtils.isEmpty(apiKey) || apiKey.equals("DEFAULT_API_KEY")) {
@@ -482,6 +494,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     Log.i("Places test", "callApiSearchText   4: " + locationText);
 
                     placeList = response.getPlaces().toArray(new Place[0]);
+                    SaveToDatabase(placeList);
                     places = new PlaceInfo[placeList.length];
                     for (Place place : placeList) {
 
@@ -527,6 +540,96 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             Log.e("Error Search Place API: ", e.getMessage());
         }
     }
+    public void callApiSearchTextNew(String textToSearch, EditText editText, ListView suggestionsListView) {
+        try {
+            AtomicReference<List<Place>> placeListInfo = new AtomicReference<>(new ArrayList<>());
+            Log.i("Places test", "callApiSearchText   1: " + textToSearch);
+            // Restrict the areas
+            Location currentLocation = googleMap.getMyLocation();
+            if (currentLocation == null) {
+                return ;
+            } else {
+            }
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
+            Log.i("Places test", "callApiSearchText   2: " + textToSearch);
+
+            final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(textToSearch, placeFields).setMaxResultCount(10).build();
+            Log.i("Places test", "callApiSearchText   3: " + textToSearch);
+
+            placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                try {
+                    Log.i("Places test", "callApiSearchText   4: " + textToSearch);
+
+                    placeListInfo.set(Arrays.asList(response.getPlaces().toArray(new Place[0])));
+
+                    List<Place> placeList = response.getPlaces();
+                    List<String> suggestions = new ArrayList<>();
+                    for (Place place : placeList) {
+                        Log.i("Places test 115", "Place found: " + place.toString());
+                        suggestions.add(place.getName() + " ( " + place.getAddress() + " )");
+                    }
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                ArrayAdapter<String> adapter = new ArrayAdapter<>(mainActivity, android.R.layout.simple_list_item_1, suggestions);
+                                suggestionsListView.setAdapter(adapter);
+                                //adapter.notifyDataSetChanged();
+                                if (suggestions.size() > 0) {
+                                    suggestionsListView.setVisibility(ListView.VISIBLE);
+                                } else {
+                                    suggestionsListView.setVisibility(ListView.GONE);
+                                }
+
+                                suggestionsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                    @Override
+                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                        try {
+                                            String locationLatLng = placeList.get(position).getLatLng().toString();
+                                            String locationLatLngProcessed = "";
+                                            if (locationLatLng.length() >= 3) {
+                                                String parts[] = locationLatLng.split("\\(");
+                                                if (parts.length >= 2) {
+                                                    String parts2[] = parts[1].split("\\)");
+                                                    locationLatLngProcessed = parts2[0];
+                                                }
+                                            } else {
+                                                Toast.makeText(mainActivity, "Location not found", Toast.LENGTH_SHORT).show();
+                                            }
+                                            Log.i("Placestest111111111", "Place selected: " + position);
+                                            editText.setText(locationLatLngProcessed);
+                                            suggestionsListView.setVisibility(ListView.GONE);
+
+                                        }catch (Exception e){
+                                            Log.e("Error Search Place API: ", String.valueOf(e));
+                                        }
+
+                                    }
+                                });
+
+                            } catch (Exception e) {
+                                Log.e("Error Search Place API: ", String.valueOf(e));
+                            }
+
+                        }
+                    });
+
+
+                } catch (Exception e) {
+                    Log.e("Error Search Place API: ", String.valueOf(e));
+                }
+
+            }).addOnFailureListener((exception) -> {
+                Log.e("Places test", "Place not found: " + exception);
+            });
+        } catch (Exception e) {
+            Log.e("Error Search Place API: ", String.valueOf(e));
+        }
+
+    }
+
+
 
 
     private void enableMyLocation() {
@@ -565,5 +668,63 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
+    }
+
+    private  void SaveToDatabase(Place[] placeList) {
+        String saveField = "SearchPlaces";
+        this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    ArrayList<String> placeArray = (ArrayList<String>) documentSnapshot.get(saveField);
+
+                    if (placeArray == null) {
+                        placeArray = new ArrayList<>();
+                    }
+                    for (Place place : placeList) {
+                        placeArray.add(place.getId());
+                    }
+
+                    Map<String, Object> updates = new HashMap<>();
+                    updates.put(saveField, placeArray);
+                    docRef.update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("SearchFragment", "Document updated successfully!");
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Log.d("SearchFragment", "Error updating document", e);
+                        }
+                    });
+                } else {
+                    Log.d("SearchFragment", "Document does not exist, create a new one");
+                    ArrayList<String> placeArray = new ArrayList<>();
+
+                    for (Place place : placeList) {
+                        placeArray.add(place.getId());
+                    }
+
+                    Map<String, Object> data = new HashMap<>();
+                    data.put(saveField, placeArray);
+
+                    // Tạo mới document
+                    docRef.set(data)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("SearchFragment", "Document created successfully!");
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("SearchFragment", "Error creating document", e);
+                                }
+                            });
+                }
+            }
+        });
     }
 }

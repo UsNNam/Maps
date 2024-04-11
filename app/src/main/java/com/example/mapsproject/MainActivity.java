@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mapsproject.Entity.TravelMode;
+import com.example.mapsproject.Fragment.SearchHistoryFragment;
 import com.example.mapsproject.Fragment.SoloPhotoFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -66,6 +67,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     PlaceDetailFragment placeDetailFragment = null;
 
     private ImageButton mapStyleButton;
+    private ImageButton directionButton;
     private LinearLayout mapSelector;
     private ImageButton mapStyleClose;
     private GridView mapTypeGrid;
@@ -82,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public Bundle myBundle;
 
     SavePlaceFragment savePlaceFragment;
+    SearchHistoryFragment searchHistoryFragment;
     RelativeLayout homeLayout;
     private Marker markerAdded;
     private SavePlace sp;
@@ -95,7 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
             setContentView(R.layout.activity_main);
-            destinationEditText = findViewById(R.id.destinationEditText);
+
             curContext = this;
             ft = getSupportFragmentManager().beginTransaction();
             // Tạo và gắn searchFragment
@@ -129,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
-
+            destinationEditText = findViewById(R.id.destinationEditText);
             bottomSheet = findViewById(R.id.bottomSheet);
             originalHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_original_height);
             expandedHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_expanded_height);
@@ -156,6 +159,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return false;
                 }
             });
+
+            directionButton = (ImageButton) findViewById(R.id.directionButton);
 
             mapSelector = (LinearLayout) findViewById(R.id.mapStyleSelector);
             mapStyleButton = (ImageButton) findViewById(R.id.mapStyleButton);
@@ -234,6 +239,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return true; // Return true to consume the event
                 }
                 return false; // Return false to pass the event to other listeners
+            }
+        });
+
+        directionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    RouteActivity routeActivity = new RouteActivity(curContext);
+                    routeActivity.displayRouteInfo();
+
+                } catch (Exception e) {
+                    Log.e("Error HTTP", e.getMessage());
+                }
             }
         });
 
@@ -502,7 +520,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Toast.makeText(curContext, "Search button selected3", Toast.LENGTH_SHORT).show();
                 return true;
             } else if (itemId == R.id.navigation_profile) {
+                homeLayout.setVisibility(View.GONE);
                 Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
+                ft = getSupportFragmentManager().beginTransaction();
+                searchHistoryFragment = SearchHistoryFragment.newInstance("search_history");
+                ft.replace(R.id.fragment_container, searchHistoryFragment);
+                ft.commit();
+
                 return true;
             }
             return false;
