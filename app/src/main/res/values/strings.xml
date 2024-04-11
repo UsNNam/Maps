@@ -2,6 +2,7 @@
     <string name="app_name">Maps Project</string>
     <string name="api_key">AIzaSyC4eQTS4oxvsgONLXCsbeBFUp68WhXYTJ0</string>
     <string name="openai_key">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</string>
+    <string name="openai_prompt_image1">Chỉ trả lời cho tôi duy nhất 1 danh từ là tên của địa điểm hoặc tên một thương hiệu trong ảnh . ví dụ: công viên, trường Khoa Học Tự Nhiên, cửa hàng tiện lợi, DisneyLand,... So that i can get the text you send to me to search on google map</string>
     <string name="openai_prompt_image">Chỉ trả lời cho tôi duy nhất 1 danh từ là tên của địa điểm hoặc tên một thương hiệu trong ảnh . ví dụ: công viên, trường Khoa Học Tự Nhiên, cửa hàng tiện lợi, DisneyLand,... So that i can get the text you send to me to search on google map</string>
 
     <string name="title_activity_taxi">TaxiActivity</string>
