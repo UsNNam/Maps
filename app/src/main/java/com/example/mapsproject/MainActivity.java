@@ -2,6 +2,7 @@ package com.example.mapsproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -45,8 +46,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-
+import android.Manifest;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -88,6 +91,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             super.onCreate(savedInstanceState);
             myBundle = savedInstanceState;
+            checkAndRequestPermissions();
+
+
             setContentView(R.layout.activity_main);
             destinationEditText = findViewById(R.id.destinationEditText);
             curContext = this;
@@ -168,6 +174,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         homeLayout = (RelativeLayout) findViewById(R.id.home);
         navigation.setSelectedItemId(R.id.navigation_shop);
+    }
+
+
+
+
+    private static final int PERMISSION_REQUEST_CODE = 123;
+
+    private void checkAndRequestPermissions() {
+        String[] permissions = new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.INTERNET,
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(permission);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSION_REQUEST_CODE);
+        }
     }
 
 
