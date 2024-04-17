@@ -47,7 +47,7 @@ public class SignupActivity extends AppCompatActivity {
 
                 String username = signupUsername.getText().toString();
                 String email = signupEmail.getText().toString();
-                String password = signupPassword.getText().toString();
+                String password = LoginActivity.hashPassword(signupPassword.getText().toString());
 
                 HelperClass helperClass = new HelperClass(username, email, password);
                 reference.child(username).setValue(helperClass);

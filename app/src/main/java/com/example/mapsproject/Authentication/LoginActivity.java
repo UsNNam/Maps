@@ -36,6 +36,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
 
 public class LoginActivity extends AppCompatActivity {
@@ -111,7 +113,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginUsername.setError(null);
                     String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
 
-                    if(Objects.equals(passwordFromDB, userPassword)) {
+                    if(checkPassword(userPassword, passwordFromDB)) {
                         loginUsername.setError(null);
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         session.setLogin(true, userUsername);
@@ -133,5 +135,32 @@ public class LoginActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    public static String hashPassword(String password) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            byte[] hash = digest.digest(password.getBytes());
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) {
+                    hexString.append('0');
+                }
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static boolean checkPassword(String password, String storedHashedPassword) {
+        String hashedPasswordToCheck = hashPassword(password);
+
+        return hashedPasswordToCheck.equals(storedHashedPassword);
     }
 }
