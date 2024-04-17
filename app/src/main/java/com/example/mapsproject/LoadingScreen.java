@@ -16,7 +16,7 @@ public class LoadingScreen extends AppCompatActivity {
         setContentView(R.layout.activity_loading_screen);
 
         session = new SessionManager(getApplicationContext());
-
+//        session.setLogin(false, "");
         if (session.isLoggedIn()) {
             Intent intent = new Intent(LoadingScreen.this, MainActivity.class);
             GlobalVariable.userName = session.getUsername();

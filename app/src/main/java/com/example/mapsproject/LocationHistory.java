@@ -63,6 +63,10 @@ public class LocationHistory extends Service {
     };
 
     private void saveLocation() {
+        SessionManager session = new SessionManager(getApplicationContext());
+        if (!session.isLoggedIn())
+            return;
+
         if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             GlobalVariable.myMap.setMyLocationEnabled(true);
         }

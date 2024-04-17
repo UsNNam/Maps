@@ -28,6 +28,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mapsproject.Authentication.LoginActivity;
 import com.example.mapsproject.Entity.TravelMode;
 import com.example.mapsproject.Fragment.SearchHistoryFragment;
 import com.example.mapsproject.Fragment.SoloPhotoFragment;
@@ -41,13 +42,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
 import android.Manifest;
@@ -79,15 +85,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int currentMapStyle = 0;
     private boolean[] mapDetailList = {false, false};
     private FusedLocationProviderClient fusedLocationProviderClient;
-
     private SoloPhotoFragment soloPhotoFragment = null;
     public Bundle myBundle;
-
     SavePlaceFragment savePlaceFragment;
     SearchHistoryFragment searchHistoryFragment;
     RelativeLayout homeLayout;
     private Marker markerAdded;
     private SavePlace sp;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference docRef;
+    Polyline locationHistoryLine;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
@@ -98,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
             setContentView(R.layout.activity_main);
+
+            docRef = db.collection("LocationHistory").document(GlobalVariable.userName);
 
             curContext = this;
             ft = getSupportFragmentManager().beginTransaction();
@@ -180,9 +189,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         homeLayout = (RelativeLayout) findViewById(R.id.home);
         navigation.setSelectedItemId(R.id.navigation_shop);
     }
-
-
-
 
     private static final int PERMISSION_REQUEST_CODE = 123;
 
@@ -532,6 +538,60 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
     public void showLocationHistory() {
+        Log.d("hello", "vao day 1");
         homeLayout.setVisibility(View.VISIBLE);
+        this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    Log.d("hello", "vao day 2");
+
+                    ArrayList<String> historyArray = (ArrayList<String>) documentSnapshot.get("History");
+
+                    if (historyArray != null) {
+                        Log.d("hello", "vao day 3");
+
+                        ArrayList<LatLng> locationArray = new ArrayList<>();
+
+                        for (String item: historyArray) {
+                            String[] splittedItem = item.split(" ");
+                            String[] date = splittedItem[0].split("-");
+                            int day = Integer.parseInt(date[0]);
+                            int month = Integer.parseInt(date[1]);
+                            int year = Integer.parseInt(date[2]);
+                            Calendar currentTime = Calendar.getInstance();
+
+                            locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
+
+                            /*if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) == month && currentTime.get(Calendar.YEAR) == year) {
+                                locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
+                            }*/
+
+                            if (locationArray.size() == 0) {
+                                Toast.makeText(MainActivity.this, "No location history today", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            PolylineOptions polylineOptions = new PolylineOptions();
+                            polylineOptions.addAll(locationArray);
+                            polylineOptions.width(5);
+                            polylineOptions.color(Color.BLUE);
+
+                            locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
+                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));
+                            Log.d("hello", "vao day 4");
+
+                        }
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this, "No location history", Toast.LENGTH_SHORT).show();
+                    }
+
+                } else {
+                    Toast.makeText(MainActivity.this, "No location history", Toast.LENGTH_SHORT).show();
+                    Log.d("LocationHistory", "Document does not exist");
+                }
+            }
+        });
     }
 }
