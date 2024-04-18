@@ -26,15 +26,27 @@ public class SavePlace {
         favoriteplace = new ArrayList<>();
     };
 
-    public void setMarkOnMap(@NonNull GoogleMap googleMap)
-    {
+    public void setMarkOnMap(@NonNull GoogleMap googleMap) {
         sp.readData(new SavePlaceDB.FirestoreCallback() {
             @Override
             public void onCallback(ArrayList<HashMap<String, Object>> list) {
-                Log.d("TAG", list + " longtitude latitude");
-                for (HashMap i : list) {
-                    LatLng parsedPosition = new LatLng((Double) i.get("longtitude"), (Double) i.get("latitude"));
-                    Log.d("TAG", parsedPosition + " longtitude latitude");
+                Log.d("TAG", list + " longitude latitude");
+                for (HashMap<String, Object> i : list) {
+                    // Retrieve the values and check for null
+                    Object longitudeObj = i.get("longitude");
+                    Object latitudeObj = i.get("latitude");
+
+                    if (longitudeObj == null || latitudeObj == null) {
+                        Log.d("TAG", "Longitude or latitude is null");
+                        continue; // Skip this iteration if either value is null
+                    }
+
+                    // Now safe to cast since nulls are handled
+                    double longitude = (Double) longitudeObj;
+                    double latitude = (Double) latitudeObj;
+
+                    LatLng parsedPosition = new LatLng(latitude, longitude);
+                    Log.d("TAG", parsedPosition + " longitude latitude");
                     googleMap.addMarker(new MarkerOptions().position(parsedPosition).title("New Marker"));
                 }
             }
