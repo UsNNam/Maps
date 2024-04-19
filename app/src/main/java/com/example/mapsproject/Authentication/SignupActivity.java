@@ -53,7 +53,8 @@ public class SignupActivity extends AppCompatActivity {
                     signupUsername.setError("This field cannot be empty");
                     return;
                 }
-                if (password.isEmpty()) {
+                assert password != null;
+                if (signupPassword.getText().toString().isEmpty()) {
                     signupPassword.setError("This field cannot be empty");
                     return;
                 }
