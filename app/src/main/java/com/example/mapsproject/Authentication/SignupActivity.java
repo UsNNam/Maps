@@ -49,6 +49,19 @@ public class SignupActivity extends AppCompatActivity {
                 String email = signupEmail.getText().toString();
                 String password = LoginActivity.hashPassword(signupPassword.getText().toString());
 
+                if (username.isEmpty()) {
+                    signupUsername.setError("This field cannot be empty");
+                    return;
+                }
+                if (password.isEmpty()) {
+                    signupPassword.setError("This field cannot be empty");
+                    return;
+                }
+                if (email.isEmpty()) {
+                    signupEmail.setError("This field cannot be empty");
+                    return;
+                }
+
                 HelperClass helperClass = new HelperClass(username, email, password);
                 reference.child(username).setValue(helperClass);
 

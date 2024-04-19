@@ -538,18 +538,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
     public void showLocationHistory() {
-        Log.d("hello", "vao day 1");
         homeLayout.setVisibility(View.VISIBLE);
         this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    Log.d("hello", "vao day 2");
 
                     ArrayList<String> historyArray = (ArrayList<String>) documentSnapshot.get("History");
 
                     if (historyArray != null) {
-                        Log.d("hello", "vao day 3");
 
                         ArrayList<LatLng> locationArray = new ArrayList<>();
 
@@ -579,7 +576,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                             locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
                             GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));
-                            Log.d("hello", "vao day 4");
 
                         }
                     }
