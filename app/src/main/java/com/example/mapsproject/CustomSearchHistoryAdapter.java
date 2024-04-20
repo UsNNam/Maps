@@ -31,11 +31,16 @@ import java.util.List;
 public class CustomSearchHistoryAdapter extends ArrayAdapter<String> {
     Context context;
     List<String> placeIds;
+    List<String> placeNames;
+    List<String> placeAddresses;
+
     private PlacesClient placesClient;
-    public CustomSearchHistoryAdapter(Context context, int layoutToBeInflated, List<String> placeids)
+    public CustomSearchHistoryAdapter(Context context, int layoutToBeInflated, List<String> placeids, List<String> placeNames, List<String> placeAddress)
     {
         super(context, layoutToBeInflated, placeids);
         this.placeIds = placeids;
+        this.placeNames = placeNames;
+        this.placeAddresses = placeAddress;
         this.context = context;
         placesClient = Places.createClient(context);
     }
@@ -49,16 +54,8 @@ public class CustomSearchHistoryAdapter extends ArrayAdapter<String> {
         TextView placeName = (TextView) convertView.findViewById(R.id.placeName);
         TextView placeAddress = (TextView) convertView.findViewById(R.id.placeAddress);
 
-        List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
-        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeIds.get(position), placeFields);
-
-        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
-            Place place = response.getPlace();
-            placeName.setText(place.getName());
-            placeAddress.setText(place.getAddress());
-        }).addOnFailureListener((exception) -> {
-            Log.e("CustomSearchHistoryAdapter", "Place not found: " + exception.getMessage());
-        });
+        placeName.setText(placeNames.get(position));
+        placeAddress.setText(placeAddresses.get(position));
 
         return convertView;
     }

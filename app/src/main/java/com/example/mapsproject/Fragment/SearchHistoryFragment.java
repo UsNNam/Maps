@@ -66,7 +66,7 @@ public class SearchHistoryFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        String saveField = "SearchPlaces";
+//        String saveField = "SearchPlaces";
         LinearLayout layout =  (LinearLayout) inflater.inflate(R.layout.search_history_fragment, null);
         back = (ImageButton) layout.findViewById(R.id.backButton);
         historyList = (ListView) layout.findViewById(R.id.historyList);
@@ -76,10 +76,12 @@ public class SearchHistoryFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    ArrayList<String> placeArray = (ArrayList<String>) documentSnapshot.get(saveField);
+                    ArrayList<String> placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
+                    ArrayList<String> placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
+                    ArrayList<String> placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
 
-                    if (placeArray != null) {
-                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, reverseArrayList(placeArray));
+                    if (placeIdArray != null) {
+                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, reverseArrayList(placeIdArray), reverseArrayList(placeNameArray), reverseArrayList(placeAddArray));
                         historyList.setAdapter(adapter);
                     }
 

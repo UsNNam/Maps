@@ -629,9 +629,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
 
     }
 
-
-
-
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (googleMap != null) {
@@ -671,22 +668,31 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     }
 
     private  void SaveToDatabase(Place[] placeList) {
-        String saveField = "SearchPlaces";
+//        String saveField = "SearchPlaces";
         this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    ArrayList<String> placeArray = (ArrayList<String>) documentSnapshot.get(saveField);
+                    ArrayList<String> placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
+                    ArrayList<String> placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
+                    ArrayList<String> placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
 
-                    if (placeArray == null) {
-                        placeArray = new ArrayList<>();
+                    if (placeIdArray == null) {
+                        placeIdArray = new ArrayList<>();
+                        placeNameArray = new ArrayList<>();
+                        placeAddArray = new ArrayList<>();
                     }
                     for (Place place : placeList) {
-                        placeArray.add(place.getId());
+                        placeIdArray.add(place.getId());
+                        placeNameArray.add(place.getName());
+                        placeAddArray.add(place.getAddress());
                     }
 
                     Map<String, Object> updates = new HashMap<>();
-                    updates.put(saveField, placeArray);
+                    updates.put("SearchPlacesId", placeIdArray);
+                    updates.put("SearchPlacesName", placeNameArray);
+                    updates.put("SearchPlacesAddress", placeAddArray);
+
                     docRef.update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
@@ -700,14 +706,19 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     });
                 } else {
                     Log.d("SearchFragment", "Document does not exist, create a new one");
-                    ArrayList<String> placeArray = new ArrayList<>();
-
+                    ArrayList<String> placeIdArray = new ArrayList<>();
+                    ArrayList<String> placeNameArray = new ArrayList<>();
+                    ArrayList<String> placeAddArray = new ArrayList<>();
                     for (Place place : placeList) {
-                        placeArray.add(place.getId());
+                        placeIdArray.add(place.getId());
+                        placeNameArray.add(place.getName());
+                        placeAddArray.add(place.getAddress());
                     }
 
                     Map<String, Object> data = new HashMap<>();
-                    data.put(saveField, placeArray);
+                    data.put("SearchPlacesId", placeIdArray);
+                    data.put("SearchPlacesName", placeNameArray);
+                    data.put("SearchPlacesAddress", placeAddArray);
 
                     // Tạo mới document
                     docRef.set(data)
