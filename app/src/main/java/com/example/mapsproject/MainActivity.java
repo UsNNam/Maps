@@ -3,6 +3,7 @@ package com.example.mapsproject;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -38,7 +39,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.mapsproject.Authentication.LoginActivity;
 import com.example.mapsproject.Entity.TravelMode;
+import com.example.mapsproject.Fragment.SearchHistoryFragment;
 import com.example.mapsproject.Fragment.SoloPhotoFragment;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -51,11 +54,16 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PointOfInterest;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.gson.Gson;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +71,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
+import android.Manifest;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
@@ -80,6 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     PlaceDetailFragment placeDetailFragment = null;
 
     private ImageButton mapStyleButton;
+    private ImageButton directionButton;
     private LinearLayout mapSelector;
     private ImageButton mapStyleClose;
     private GridView mapTypeGrid;
@@ -91,14 +100,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private int currentMapStyle = 0;
     private boolean[] mapDetailList = {false, false};
     private FusedLocationProviderClient fusedLocationProviderClient;
-
     private SoloPhotoFragment soloPhotoFragment = null;
     public Bundle myBundle;
-
     SavePlaceFragment savePlaceFragment;
+    SearchHistoryFragment searchHistoryFragment;
+    RelativeLayout homeLayout;
     static RelativeLayout homeLayout;
     private Marker markerAdded;
     private SavePlace sp;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    DocumentReference docRef;
+    Polyline locationHistoryLine;
     private WeatherForecastV2 w;
     ImageButton weatherbtn;
     private PopupWindow popupWindow;
@@ -112,8 +124,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             super.onCreate(savedInstanceState);
             myBundle = savedInstanceState;
+            checkAndRequestPermissions();
+
+
             setContentView(R.layout.activity_main);
-            destinationEditText = findViewById(R.id.destinationEditText);
+
+            docRef = db.collection("LocationHistory").document(GlobalVariable.userName);
+
             curContext = this;
             ft = getSupportFragmentManager().beginTransaction();
             // Tạo và gắn searchFragment
@@ -147,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
             mapFragment.getMapAsync(this);
 
-
+            destinationEditText = findViewById(R.id.destinationEditText);
             bottomSheet = findViewById(R.id.bottomSheet);
             originalHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_original_height);
             expandedHeight = getResources().getDimensionPixelSize(R.dimen.bottom_sheet_expanded_height);
@@ -174,6 +191,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return false;
                 }
             });
+
+            directionButton = (ImageButton) findViewById(R.id.directionButton);
 
             mapSelector = (LinearLayout) findViewById(R.id.mapStyleSelector);
             mapStyleButton = (ImageButton) findViewById(R.id.mapStyleButton);
@@ -230,6 +249,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.d("TESTWEATHER", json + " ");
                 WeatherDataV2.Hour current = w.weatherData.getForecast().getForecastday().get(0).getHour().get(curTime);
                 WeatherDataV2.Condition condition = current.getCondition();
+
+    private static final int PERMISSION_REQUEST_CODE = 123;
+
+    private void checkAndRequestPermissions() {
+        String[] permissions = new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.INTERNET,
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(permission);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSION_REQUEST_CODE);
+        }
+    }
 
                 int isday = current.getIs_day();
                 int code = condition.getCode();
@@ -382,16 +424,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
 //        GlobalVariable.myMap = googleMap;
-
+        LatLng sydney = new LatLng(10.761214, 106.682071);
+        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         // Zoom in the Google Map, people don't need to zoom in manually
-        LatLng hanoi = new LatLng(21.028511, 105.804817);
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(hanoi)      // Đặt vị trí camera mới
-                .zoom(12)           // Đặt mức độ zoom
-                .bearing(0)         // Đặt hướng của camera
-                .tilt(30)           // Đặt góc nghiêng của camera
-                .build();           // Tạo CameraPosition từ builder
-        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
         destinationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -406,6 +442,19 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     return true; // Return true to consume the event
                 }
                 return false; // Return false to pass the event to other listeners
+            }
+        });
+
+        directionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    RouteActivity routeActivity = new RouteActivity(curContext);
+                    routeActivity.displayRouteInfo();
+
+                } catch (Exception e) {
+                    Log.e("Error HTTP", e.getMessage());
+                }
             }
         });
 
@@ -608,6 +657,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapClick(@NonNull LatLng latLng) {
         if (markerAdded == null )
         {
+
             markerAdded= GlobalVariable.myMap.addMarker(new MarkerOptions().position(latLng).title("New Marker"));
         }
         else
@@ -617,9 +667,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         // Hiển thị thông tin tọa độ latLng lên log hoặc UI
         Log.i("MapClick", "Lat: " + latLng.latitude + ", Long: " + latLng.longitude);
-
-//        MarkResultPlaceId mr = new MarkResultPlaceId(MainActivity.this);
-//        mr.execute(latLng.latitude, latLng.longitude);
     }
 
     private void getDeviceLocation() {
@@ -627,7 +674,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
          */
-
         try {
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
@@ -666,6 +712,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             int itemId = item.getItemId();
             if (itemId == R.id.homeNavigation) {
                 homeLayout.setVisibility(View.VISIBLE);
+                if (locationHistoryLine != null) {
+                    locationHistoryLine.remove();
+                    locationHistoryLine = null;
+                }
                 return true;
             } else if (itemId == R.id.saveNavigation) {
                 homeLayout.setVisibility(View.GONE);
@@ -674,6 +724,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 savePlaceFragment = SavePlaceFragment.newInstance("save_fragment");
                 ft.replace(R.id.fragment_container, savePlaceFragment);
                 ft.commit();
+
                 return true;
             } else if (itemId == R.id.convertNavigation) {
                 homeLayout.setVisibility(View.GONE);
@@ -684,7 +735,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 ft.commit();
                 return true;
             } else if (itemId == R.id.navigation_profile) {
+                homeLayout.setVisibility(View.GONE);
                 Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
+                ft = getSupportFragmentManager().beginTransaction();
+                searchHistoryFragment = SearchHistoryFragment.newInstance("search_history");
+                ft.replace(R.id.fragment_container, searchHistoryFragment);
+                ft.commit();
+
                 return true;
             }
             return false;
@@ -706,5 +763,62 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
+    public void showLocationHistory() {
+        homeLayout.setVisibility(View.VISIBLE);
+        this.docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
 
+                    ArrayList<String> historyArray = (ArrayList<String>) documentSnapshot.get("History");
+
+                    if (historyArray != null) {
+
+                        ArrayList<LatLng> locationArray = new ArrayList<>();
+
+                        for (String item: historyArray) {
+                            String[] splittedItem = item.split(" ");
+                            String[] date = splittedItem[0].split("-");
+                            int day = Integer.parseInt(date[0]);
+                            int month = Integer.parseInt(date[1]);
+                            int year = Integer.parseInt(date[2]);
+                            Calendar currentTime = Calendar.getInstance();
+
+                            locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
+
+                            /*if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) == month && currentTime.get(Calendar.YEAR) == year) {
+                                locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
+                            }*/
+
+                            if (locationArray.size() == 0) {
+                                Toast.makeText(MainActivity.this, "No location history today", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+
+                            PolylineOptions polylineOptions = new PolylineOptions();
+                            polylineOptions.addAll(locationArray);
+                            polylineOptions.width(5);
+                            polylineOptions.color(Color.BLUE);
+
+                            if (locationHistoryLine != null) {
+                                locationHistoryLine.remove();
+                                locationHistoryLine = null;
+                            }
+
+                            locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
+                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));
+
+                        }
+                    }
+                    else {
+                        Toast.makeText(MainActivity.this, "No location history", Toast.LENGTH_SHORT).show();
+                    }
+
+                } else {
+                    Toast.makeText(MainActivity.this, "No location history", Toast.LENGTH_SHORT).show();
+                    Log.d("LocationHistory", "Document does not exist");
+                }
+            }
+        });
+    }
 }

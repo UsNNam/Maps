@@ -20,8 +20,8 @@
 
         <item
             android:id="@+id/navigation_profile"
-            android:icon="@drawable/khampha"
-            android:title="Chua biet" />
+            android:icon="@drawable/search_history"
+            android:title="History" />
 
 </menu>
 

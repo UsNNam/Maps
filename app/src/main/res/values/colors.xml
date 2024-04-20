@@ -16,5 +16,6 @@
     <color name="bgCoordinateColorv2">#CDF2FE</color>
     <color name="bgCoordinateColor">#FFFFFFFF</color>
 
+    <color name="primary">#31CCFE</color>
 
 </resources>

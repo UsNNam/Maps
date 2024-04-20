@@ -59,6 +59,9 @@ public class PlaceInfo {
     public String getLatLngString() {
         String result = place.getLatLng().toString();
         String[] parts = result.split("\\(");
+        if(parts.length < 2) {
+            return null;
+        }
         String[] parts2 = parts[1].split("\\)");
         return parts2[0];
     }

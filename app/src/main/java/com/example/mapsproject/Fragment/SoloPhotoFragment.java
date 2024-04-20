@@ -16,12 +16,13 @@ import com.bumptech.glide.Glide;
 import com.example.mapsproject.MainActivity;
 import com.example.mapsproject.PlaceDetailFragment;
 import com.example.mapsproject.R;
+import com.github.chrisbanes.photoview.PhotoView;
 
 public class SoloPhotoFragment extends Fragment {
 
 
     private Context context;
-    private ImageView imageView;
+    private PhotoView imageView;
     private ImageButton back;
     private MainActivity mainActivity;
 

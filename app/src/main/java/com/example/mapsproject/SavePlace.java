@@ -30,8 +30,7 @@ public class SavePlace {
         favoriteplace = new ArrayList<>();
     };
 
-    public void setMarkOnMap(@NonNull GoogleMap googleMap)
-    {
+    public void setMarkOnMap(@NonNull GoogleMap googleMap) {
         sp.readData(new SavePlaceDB.FirestoreCallback() {
             @Override
             public void onCallback(ArrayList<HashMap<String, Object>> list) {
