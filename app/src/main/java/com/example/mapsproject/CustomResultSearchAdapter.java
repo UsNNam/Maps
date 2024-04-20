@@ -38,6 +38,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -48,14 +50,41 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
     private final PlaceInfo[] places;
     private SavePlace sp;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1001;
-
+    private boolean [] isSaved ;
 
     public CustomResultSearchAdapter(Context context, int layoutToBeInflated, PlaceInfo[] places, PlacesClient placesClient) {
         super(context, layoutToBeInflated, places);
         this.context = context;
         this.places = places;
+        isSaved = new boolean[places.length];
         Log.i("CustomResultSearchAdapter", "Constructor");
-        sp = new SavePlace("test");
+        sp = new SavePlace("test", context);
+
+
+            SavePlaceDB db = new SavePlaceDB("test",context);
+            db.readData(new SavePlaceDB.FirestoreCallback() {
+                @Override
+                public void onCallback(ArrayList<HashMap<String, Object>> list) {
+                    for (int i=0; i< places.length; i++) {
+                        String placeID = places[i].place.getId();
+
+                        for (HashMap j : list) {
+                            Log.d(TAG, "chay o day ");
+                            if (placeID.equals(j.get("placeID"))) {
+                                Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                                isSaved[i] = true;
+                                break;
+                            }
+                            else isSaved[i]=false;
+                            Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                        }
+                    }
+                }
+            });
+        Log.d("TEST", "Bi bat dong bo " );
+        for (int i=0; i<isSaved.length; i++) {
+            Log.d("TEST", "Item2: " + isSaved[i]);
+        }
     }
     static public CompletableFuture<String> getLastLocation(
                                                      Context context) {
@@ -279,26 +308,38 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
                     holder.photoList.addView(singleFrame);
                 }
             }
+            Log.d("TEST", "ISSAVED "+ isSaved[position]);
+            holder.save.setSelected(isSaved[position]);
             holder.save.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+
+                    String ID=cur.getId();
+                    String placeName = cur.getName();
+                    Toast.makeText(context, ID, Toast.LENGTH_SHORT).show();
                     String[] geometry = places[position].getLatLngString().split(",", 2);
-                    Toast.makeText(context, geometry[0] + geometry[1], Toast.LENGTH_SHORT).show();
 //                sp = datasource.createSavePlace(Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]));
                     if (v.isSelected()==false)
                     {
-                        sp.addSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v) ;
+//                        sp.addSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v);
+                        sp.addSavePlaceV2(ID,placeName, Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]),v);
+                        Toast.makeText(context, "Save", Toast.LENGTH_SHORT).show();
+                        isSaved[position]=true;
                     }
                     else
                     {
-                        sp.removeSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v);
+                       sp.removeSavePlace(ID,placeName, Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]), v);
+                        Toast.makeText(context, "Remove", Toast.LENGTH_SHORT).show();
+                        isSaved[position]=false;
                     }
+
+
                 }
             });
 
-            LatLng geo = cur.getLatLng();
-            Log.d(TAG, geo.latitude +" " + geo.longitude + "tim o day");
-            sp.setSelectedButton(geo,holder);
+
+
+
 
             return convertView;
 

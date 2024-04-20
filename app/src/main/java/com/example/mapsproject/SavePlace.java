@@ -2,6 +2,7 @@ package com.example.mapsproject;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.View;
 
@@ -9,6 +10,7 @@ import androidx.annotation.NonNull;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
@@ -17,12 +19,14 @@ import java.util.HashMap;
 public class SavePlace {
     private double longtitude;
     private double langtitude;
-
+    private String id;
     ArrayList<HashMap<String,Object>> favoriteplace;
     SavePlaceDB sp;
-    SavePlace(String username)
+    private Context context;
+    SavePlace(String username, Context context)
     {
-        this.sp = new SavePlaceDB(username);
+
+        this.sp = new SavePlaceDB(username, context);
         favoriteplace = new ArrayList<>();
     };
 
@@ -33,9 +37,11 @@ public class SavePlace {
             public void onCallback(ArrayList<HashMap<String, Object>> list) {
                 Log.d("TAG", list + " longtitude latitude");
                 for (HashMap i : list) {
-                    LatLng parsedPosition = new LatLng((Double) i.get("longtitude"), (Double) i.get("latitude"));
+                    LatLng parsedPosition = new LatLng((Double) i.get("latitude"), (Double) i.get("longitude"));
                     Log.d("TAG", parsedPosition + " longtitude latitude");
-                    googleMap.addMarker(new MarkerOptions().position(parsedPosition).title("New Marker"));
+                    Marker temp = googleMap.addMarker(new MarkerOptions().position(parsedPosition).title(i.get("placeName").toString()));
+                    temp.setTag(i.get("placeID").toString());
+                    temp.showInfoWindow();
                 }
             }
         });
@@ -49,10 +55,10 @@ public class SavePlace {
                 for (HashMap j : list)
                 {
                     Log.d(TAG, "chay o day ");
-                    if (geo.latitude == (Double) j.get("latitude") &&
-                            geo.longitude == (Double) j.get("longtitude"))
+                    if (Double.compare(geo.latitude , (Double) j.get("latitude"))==0 &&
+                            Double.compare( geo.longitude ,(Double) j.get("longtitude"))==0)
                     {
-                        Log.d(TAG, "run here");
+                        Log.d(TAG, "run here ["+geo + "] , "+ j.get("latitude")+ ", "+j.get("longtitude") );
                         holder.save.setSelected(true);
                         break;
                     }
@@ -65,29 +71,15 @@ public class SavePlace {
         sp.createSavePlace(latitude, longtitude);
         v.setSelected(true);
     }
-    public void removeSavePlace(Double latitude, Double longtitude, View v)
+    public void removeSavePlace(String id, String name, Double latitude, Double longitude, View v)
     {
-        sp.removeSavePlace(latitude, longtitude);
+        sp.removeSavePlace(id, name, latitude, longitude);
         v.setSelected(false);
     }
-    public double getLangtitude() {
-        return langtitude;
+
+    public void addSavePlaceV2(String id, String name, Double latitude, Double longitude,  View v) {
+        sp.createSavePlaceV2(id, name, latitude, longitude);
+        v.setSelected(true);
     }
-
-    public double getLongtitude() {
-        return longtitude;
-    }
-
-
-
-    public void setLangtitude(double langtitude) {
-        this.langtitude = langtitude;
-    }
-
-    public void setLongtitude(double longtitude) {
-        this.longtitude = longtitude;
-    }
-
-
 }
 

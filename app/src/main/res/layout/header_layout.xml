@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/bgCoordinateColor"
+    android:orientation = "vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="115dp"
+        android:background="@color/bgCoordinateColor"
+        android:orientation="vertical"
+        android:paddingLeft="15dp"
+        android:paddingTop="10dp"
+        android:paddingRight="15dp"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Coordinate Converter"
+            android:textColor="#FEFBF6"
+            android:textFontWeight="900"
+            android:textSize="24sp"></TextView>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1"
+            android:paddingTop="10dp"
+            >
+            <TableRow>
+                <Button
+                    android:id="@+id/butConvertPage"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_left_selected_coordinate"
+                    android:text="Lat/Long"
+                    app:backgroundTint="@null"
+                    android:textAlignment="center"
+                    android:textSize="16dp"
+                    android:textColor="@drawable/color_selector"
+
+                    ></Button>
+                <Button
+                    android:id="@+id/butHistoryPage"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/button_right_selected_coordinate"
+                    android:text="Address"
+                    app:backgroundTint="@null"
+                    android:textAlignment="center"
+                    android:textSize="16dp"
+                    android:textColor="@drawable/color_selector"
+                    ></Button>
+            </TableRow>
+        </TableLayout>
+    </LinearLayout>
+    <FrameLayout
+
+        android:id="@+id/container_body"
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"/>
+</LinearLayout>

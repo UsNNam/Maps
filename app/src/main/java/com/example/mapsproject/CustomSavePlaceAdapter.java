@@ -21,16 +21,16 @@ import androidx.annotation.Nullable;
 
 import java.util.List;
 
-public class CustomSavePlaceAdapter extends ArrayAdapter<Address>
+public class CustomSavePlaceAdapter extends ArrayAdapter<String>
 {
     Context context;
-    Address[] address;
+    String[] address;
 
-    public CustomSavePlaceAdapter(Context context, int layoutToBeInflated, List<Address> addresses)
+    public CustomSavePlaceAdapter(Context context, int layoutToBeInflated, List<String> addresses)
     {
         super(context, layoutToBeInflated, addresses);
         this.context = context;
-        this.address= new Address[addresses.size()];
+        this.address= new String[addresses.size()];
         addresses.toArray(this.address);
     }
     static class ViewHolder {
@@ -49,38 +49,38 @@ public class CustomSavePlaceAdapter extends ArrayAdapter<Address>
 
             holder = new ViewHolder();
             holder.locationname = (TextView) convertView.findViewById(R.id.locationame);
-            holder.more = (ImageButton) convertView.findViewById(R.id.more);
+//            holder.more = (ImageButton) convertView.findViewById(R.id.more);
             convertView.setTag(holder);
 
-            Address cur = address[0];
-            Log.d(TAG, cur.getAddressLine(0) + " address");
-            holder.locationname.setText(cur.getAddressLine(0));
-            holder.more.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    PopupMenu popupMenu = new PopupMenu(context, holder.more);
-
-                    // Inflating popup menu from popup_menu.xml file
-                    popupMenu.getMenuInflater().inflate(R.menu.more_menu, popupMenu.getMenu());
-                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                        @Override
-                        public boolean onMenuItemClick(MenuItem item) {
-                            int itemID = item.getItemId();
-                            if(itemID == R.id.remove) {        // Xử lý khi mục 1 được chọn
-                                Toast.makeText(context, "You Clicked " + item.getTitle(), Toast.LENGTH_SHORT).show();
-                                return true;
-                            }
-                            if (itemID == R.id.copy)
-                            {
-                                    Toast.makeText(context, "You Clicked " + item.getTitle(), Toast.LENGTH_SHORT).show();
-                                    return true;
-                            }
-                            return false;
-                        }
-                    });
-                    popupMenu.show();
-                }
-            });
+            String cur = address[position];
+//            Log.d(TAG, cur.getAddressLine(0) + " address");
+            holder.locationname.setText(cur);
+//            holder.more.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View v) {
+//                    PopupMenu popupMenu = new PopupMenu(context, holder.more);
+//
+//                    // Inflating popup menu from popup_menu.xml file
+//                    popupMenu.getMenuInflater().inflate(R.menu.more_menu, popupMenu.getMenu());
+//                    popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+//                        @Override
+//                        public boolean onMenuItemClick(MenuItem item) {
+//                            int itemID = item.getItemId();
+//                            if(itemID == R.id.remove) {        // Xử lý khi mục 1 được chọn
+//                                Toast.makeText(context, "You Clicked " + item.getTitle(), Toast.LENGTH_SHORT).show();
+//                                return true;
+//                            }
+//                            if (itemID == R.id.copy)
+//                            {
+//                                    Toast.makeText(context, "You Clicked " + item.getTitle(), Toast.LENGTH_SHORT).show();
+//                                    return true;
+//                            }
+//                            return false;
+//                        }
+//                    });
+//                    popupMenu.show();
+//                }
+//            });
         } else {
             holder = (ViewHolder) convertView.getTag();
         }

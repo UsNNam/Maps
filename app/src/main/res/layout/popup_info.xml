@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:theme="@style/AppTheme"
+    android:paddingTop="30dp"
+    >
+    <TextView
+        android:id="@+id/weatherTemp"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="30°"
+
+        android:textSize="12dp"
+        android:gravity="center"></TextView>
+    <ImageView
+        android:id="@+id/weatherInfoImg"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:scaleType="fitCenter"
+        android:gravity="center"
+        android:src="@drawable/w113"></ImageView>
+    <TextView
+        android:id="@+id/weatherInfoTime"
+        android:layout_width="60dp"
+        android:layout_height="wrap_content"
+        android:text="19"
+        android:textSize="12dp"
+        android:gravity="center"></TextView>
+</LinearLayout>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/bgCoordinateColorv2"
+    android:orientation = "vertical"
+    android:layout_marginBottom="80dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:text="ADDRESS"
+            android:paddingLeft="15dp"
+            android:gravity="start|center_vertical"
+            android:textColor="@color/white" >
+        </TextView>
+        <EditText
+            android:id="@+id/address"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:hint="Enter address here..."
+            android:gravity="start|center_vertical"
+            android:paddingLeft="15dp"
+            android:background="@color/white"
+            android:textColor="#9290C3"></EditText>
+        <Button
+            android:id="@+id/buttonConvertAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:background="@drawable/button_converted_selector"
+            android:text="CONVERT"
+            app:backgroundTint="@null"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_margin="15dp"
+            android:background="@drawable/convert_button_normal"
+            android:backgroundTint="@color/white">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="15dp"
+                android:text="Result"
+                android:textColor="@color/black"
+                android:textSize="35dp"></TextView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                >
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    >
+
+                    <TextView
+                        android:id="@+id/resultLongtitude"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:textColor="#9290C3"
+                        android:textSize="20dp"
+                        android:text=""
+                        ></TextView>
+                    <TextView
+                        android:id="@+id/resultLatitude"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:textColor="#9290C3"
+                        android:textSize="20dp"
+                        android:text=""
+                        ></TextView>
+
+                </LinearLayout>
+                <ImageButton
+                    android:id="@+id/copyButtonAddress"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:src="@drawable/button_copy_selector"
+                    android:background="@android:color/transparent"
+                    android:layout_gravity="end"
+                    android:layout_weight="11"
+                    ></ImageButton>
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

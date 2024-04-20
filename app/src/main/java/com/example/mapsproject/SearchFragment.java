@@ -1,7 +1,10 @@
 package com.example.mapsproject;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.text.Editable;
@@ -29,24 +32,32 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PointOfInterest;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchByTextRequest;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class SearchFragment extends Fragment implements TextWatcher, ActivityCompat.OnRequestPermissionsResultCallback, GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean permissionDenied = false;
-
+    private Marker markerAdded;
     private GoogleMap googleMap;
 
     private EditText searchLocation;
@@ -64,7 +75,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     private Place[] placeList;
 
     String apiKey;
-
+    private LoadingDialog loadingDialog;
 
     public static SearchFragment newInstance(String strArg1) {
         SearchFragment fragment = new SearchFragment();
@@ -98,6 +109,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         SupportMapFragment mapFragment = (SupportMapFragment) mainActivity.getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        loadingDialog = new LoadingDialog(context);
     }
 
     @Override
@@ -165,6 +177,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         coffee.setOnClickListener(buttonClickListener);
         groceries.setOnClickListener(buttonClickListener);
         shopping.setOnClickListener(buttonClickListener);
+        loadingDialog.createLoadingDialog();
         return search_fragment;
     }
 
@@ -278,7 +291,79 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         }
 
     }
+    private void callApiSearchText2(String locationText) {
+        try {
+            PlaceInfo.stop();
 
+            Log.i("Places test", "callApiSearchText   1: " + locationText);
+            // Restrict the areas
+            Location currentLocation = googleMap.getMyLocation();
+            if (currentLocation == null) {
+                return;
+            } else {
+            }
+            LatLng currentLatLng = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
+            final List<Place.Field> placeFields = Arrays.asList(Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
+            Log.i("Places test", "callApiSearchText   2: " + locationText);
+
+            final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(1).build();
+            Log.i("Places test", "callApiSearchText   3: " + locationText);
+            loadingDialog.showDialog();
+            placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
+                try {
+                    Log.i("Places test", "callApiSearchText   4: " + locationText);
+
+                    placeList = response.getPlaces().toArray(new Place[0]);
+                    places = new PlaceInfo[placeList.length];
+                    markerAdded.setTag(response.getPlaces().get(0).getId());
+                    Log.d("TESTMARK",response.getPlaces().get(0).getId() + " VVVV " );
+                    for (Place place : placeList) {
+
+                        Log.i("Places test", "Place found: " + place.toString());
+
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
+                                } catch (Exception e) {
+                                    Log.e("Error Search Place API thread: ", e.getMessage());
+                                }
+
+                            }
+                        }).start();
+                    }
+                    loadingDialog.hideDialog();
+                    CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
+
+                    PlaceInfo.adapter = adapter;
+
+                    mainActivity.runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                listView.setAdapter(adapter);
+
+                            } catch (Exception e) {
+                                Log.e("Error set search place adapter: ", e.getMessage());
+                            }
+
+                        }
+                    });
+                    listViewSearchResult.setVisibility(View.VISIBLE);
+                } catch (Exception e) {
+                    Log.e("Error Search Place API: ", e.getMessage());
+                }
+
+
+            }).addOnFailureListener((exception) -> {
+                Log.e("Places test", "Place not found: " + exception.getMessage());
+            });
+        } catch (Exception e) {
+            Log.e("Error Search Place API: ", e.getMessage());
+        }
+
+    }
     private void enableMyLocation() {
         if (ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             if (googleMap != null) {
@@ -297,12 +382,46 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         enableMyLocation();
         googleMap.setOnMyLocationButtonClickListener(this);
         googleMap.setOnMyLocationClickListener(this);
+        LatLng hanoi = new LatLng(21.028511, 105.804817);
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(hanoi)      // Đặt vị trí camera mới
+                .zoom(12)           // Đặt mức độ zoom
+                .bearing(0)         // Đặt hướng của camera
+                .tilt(30)           // Đặt góc nghiêng của camera
+                .build();           // Tạo CameraPosition từ builder
+        googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
-        LatLng sydney = new LatLng(-33.852, 151.211);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        googleMap.setOnPoiClickListener(new GoogleMap.OnPoiClickListener() {
+            @Override
+            public void onPoiClick(PointOfInterest poi) {
+                if (markerAdded == null)
+                {
+                    markerAdded = GlobalVariable.myMap.addMarker(new MarkerOptions()
+                            .position(poi.latLng)
+                            .title(poi.name));
+                    markerAdded.setTag(poi.placeId);
 
+                    markerAdded.showInfoWindow();
+//                    MarkResultPlaceId mr = new MarkResultPlaceId(mainActivity);
+                    Log.d("TESTPOI",poi.latLng.latitude +  " " + poi.latLng.longitude + " test " + poi.name +" "+ poi.placeId);
+                    searchLocation.setText(poi.name);
+                    callApiPlaceDetail(poi.placeId, poi.name);
+                    markerAdded.showInfoWindow();
+                }
+                else
+                {
+                    searchLocation.setText(null);
+                    listViewSearchResult.setVisibility(View.GONE);
+                    markerAdded.remove();
+                    markerAdded=null;
+                }
+
+            }
+        });
+        googleMap.setOnMapClickListener(this::onMapClick);
     }
+
 
     @Override
     public void onMyLocationClick(@NonNull Location location) {
@@ -315,5 +434,108 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
         return false;
+    }
+
+
+    public void onMapClick(@NonNull LatLng latLng) {
+        List <Address> addresses = new ArrayList<>();
+
+        Geocoder geo = new Geocoder(mainActivity);
+        if (markerAdded == null )
+        {
+            markerAdded= GlobalVariable.myMap.addMarker(new MarkerOptions().position(latLng));
+            try {
+                addresses=geo.getFromLocation(latLng.latitude, latLng.longitude, 1);
+                Log.d("TESTGEO", addresses.get(0).getAddressLine(0));
+                Log.d("TESTGEO", addresses.get(0).getFeatureName());
+                Log.d("test", "leeeeeee");
+                searchLocation.setText(addresses.get(0).getAddressLine(0));
+                callApiSearchText2(addresses.get(0).getAddressLine(0));
+                markerAdded.setTitle(addresses.get(0).getAddressLine(0));
+                markerAdded.showInfoWindow();
+
+            } catch (IOException e) {
+                Log.d("test", "Loi do o day");
+                throw new RuntimeException(e);
+            }
+        }
+        else
+        {
+            searchLocation.setText(null);
+            listViewSearchResult.setVisibility(View.GONE);
+            markerAdded.remove();
+            markerAdded=null;
+        }
+        // Hiển thị thông tin tọa độ latLng lên log hoặc UI
+        Log.i("MapClick", "Lat: " + latLng.latitude + ", Long: " + latLng.longitude);
+
+//        MarkResultPlaceId mr = new MarkResultPlaceId(MainActivity.this);
+//        mr.execute(latLng.latitude, latLng.longitude);
+    }
+    public void onMsgFromMainToSearch (String sender, String placeID, String addressName, Double latitude, Double longitude)
+    {
+        if (Objects.equals(sender, "SP2MAIN"))
+        {
+            searchLocation.setText(addressName);
+            Log.d("TESTDETAIL", addressName);
+
+            callApiPlaceDetail(placeID, addressName);
+//            callApiSearchText2(addressName);
+            LatLng latlng = new LatLng(latitude,longitude);
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng,15.0f));
+
+        }
+    }
+    @SuppressLint("SuspiciousIndentation")
+    private void callApiPlaceDetail (String placeID, String placeName) {
+        List<Place.Field> placeFields = Arrays.asList( Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER,  Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS);
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, placeFields);
+
+        Log.d ("TESTDETAIL", "CHAY O DAY");
+        placesClient.fetchPlace(request).addOnSuccessListener((response) -> {
+            Place place = response.getPlace();
+            places = new PlaceInfo[1];
+                Log.d("TESTDETAIL", "Place detail: " + place.toString());
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        try {
+                            places[0] = new PlaceInfo(place, placesClient);
+                        } catch (Exception e) {
+                            Log.e("Error Search Place API thread: ", e.getMessage());
+                        }
+
+                    }
+                }).start();
+            Log.d("TESTDETAIL", "LATLNG " + place.getLatLng());
+
+            CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
+
+            PlaceInfo.adapter = adapter;
+
+            mainActivity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        listView.setAdapter(adapter);
+                    } catch (Exception e) {
+                        Log.e("Error set search place adapter: ", e.getMessage());
+                    }
+
+                }
+            });
+            listViewSearchResult.setVisibility(View.VISIBLE);
+
+        }).addOnFailureListener((exception) -> {
+            if (exception instanceof ApiException) {
+                final ApiException apiException = (ApiException) exception;
+                Log.e("TEST", "Place not found: " + exception.getMessage());
+                final int statusCode = apiException.getStatusCode();
+                callApiSearchText2(placeName);
+                // TODO: Handle error with given status code.
+            }
+            Log.d ("TESTDETAIL", "CHAY O DAY FAIL");
+        });
     }
 }

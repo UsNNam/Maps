@@ -48,8 +48,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            resources.excludes.add("META-INF/*")
         }
     }
+
 }
 
 dependencies {
@@ -84,5 +86,10 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.12.0");
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
-    debugImplementation("androidx.compose.ui:ui-test-manifest");
+    debugImplementation("androidx.compose.ui:ui-test-manifest")
+
+    implementation("com.google.firebase:firebase-firestore:24.10.3")
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("org.asynchttpclient:async-http-client:2.12.2")
 }
