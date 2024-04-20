@@ -676,22 +676,30 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     ArrayList<String> placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
                     ArrayList<String> placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
                     ArrayList<String> placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
+                    ArrayList<String> placeLatArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLatitude");
+                    ArrayList<String> placeLongArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLongtitude");
 
                     if (placeIdArray == null) {
                         placeIdArray = new ArrayList<>();
                         placeNameArray = new ArrayList<>();
                         placeAddArray = new ArrayList<>();
+                        placeLatArray = new ArrayList<>();
+                        placeLongArray = new ArrayList<>();
                     }
                     for (Place place : placeList) {
                         placeIdArray.add(place.getId());
                         placeNameArray.add(place.getName());
                         placeAddArray.add(place.getAddress());
+                        placeLatArray.add(String.valueOf(place.getLatLng().latitude));
+                        placeLongArray.add(String.valueOf(place.getLatLng().longitude));
                     }
 
                     Map<String, Object> updates = new HashMap<>();
                     updates.put("SearchPlacesId", placeIdArray);
                     updates.put("SearchPlacesName", placeNameArray);
                     updates.put("SearchPlacesAddress", placeAddArray);
+                    updates.put("SearchPlacesLatitude", placeLatArray);
+                    updates.put("SearchPlacesLongtitude", placeLongArray);
 
                     docRef.update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
@@ -709,16 +717,23 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     ArrayList<String> placeIdArray = new ArrayList<>();
                     ArrayList<String> placeNameArray = new ArrayList<>();
                     ArrayList<String> placeAddArray = new ArrayList<>();
+                    ArrayList<String> placeLatArray = new ArrayList<>();
+                    ArrayList<String> placeLongArray = new ArrayList<>();
+
                     for (Place place : placeList) {
                         placeIdArray.add(place.getId());
                         placeNameArray.add(place.getName());
                         placeAddArray.add(place.getAddress());
+                        placeLatArray.add(String.valueOf(place.getLatLng().latitude));
+                        placeLongArray.add(String.valueOf(place.getLatLng().longitude));
                     }
 
                     Map<String, Object> data = new HashMap<>();
                     data.put("SearchPlacesId", placeIdArray);
                     data.put("SearchPlacesName", placeNameArray);
                     data.put("SearchPlacesAddress", placeAddArray);
+                    data.put("SearchPlacesLatitude", placeLatArray);
+                    data.put("SearchPlacesLongtitude", placeLongArray);
 
                     // Tạo mới document
                     docRef.set(data)

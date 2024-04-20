@@ -510,6 +510,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             int itemId = item.getItemId();
             if (itemId == R.id.navigation_shop) {
                 homeLayout.setVisibility(View.VISIBLE);
+                if (locationHistoryLine != null) {
+                    locationHistoryLine.remove();
+                    locationHistoryLine = null;
+                }
                 return true;
             } else if (itemId == R.id.navigation_gifts) {
                 homeLayout.setVisibility(View.GONE);
@@ -573,6 +577,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             polylineOptions.addAll(locationArray);
                             polylineOptions.width(5);
                             polylineOptions.color(Color.BLUE);
+
+                            if (locationHistoryLine != null) {
+                                locationHistoryLine.remove();
+                                locationHistoryLine = null;
+                            }
 
                             locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
                             GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));

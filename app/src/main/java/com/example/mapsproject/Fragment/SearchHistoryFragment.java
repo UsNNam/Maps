@@ -79,9 +79,17 @@ public class SearchHistoryFragment extends Fragment {
                     ArrayList<String> placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
                     ArrayList<String> placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
                     ArrayList<String> placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
+                    ArrayList<String> placeLatArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLatitude");
+                    ArrayList<String> placeLongArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLongtitude");
 
-                    if (placeIdArray != null) {
-                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, reverseArrayList(placeIdArray), reverseArrayList(placeNameArray), reverseArrayList(placeAddArray));
+                    placeIdArray = reverseArrayList(placeIdArray);
+                    placeNameArray = reverseArrayList(placeNameArray);
+                    placeAddArray =  reverseArrayList(placeAddArray);
+                    placeLatArray = reverseArrayList(placeLatArray);
+                    placeLongArray = reverseArrayList(placeLongArray);
+
+                    if (placeIdArray != null && placeIdArray.size() > 0) {
+                        CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, placeIdArray, placeNameArray, placeAddArray);
                         historyList.setAdapter(adapter);
                     }
 
