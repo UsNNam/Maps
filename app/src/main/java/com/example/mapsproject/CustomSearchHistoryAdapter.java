@@ -45,18 +45,32 @@ public class CustomSearchHistoryAdapter extends ArrayAdapter<String> {
         placesClient = Places.createClient(context);
     }
 
+    static class ViewHolder {
+        TextView placeName;
+        TextView placeAddress;
+
+    }
+
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        LayoutInflater inflater = ((Activity) context).getLayoutInflater();
-        convertView = inflater.inflate(R.layout.search_history_item, null);
+        ViewHolder holder;
+        if (convertView == null) {
+            LayoutInflater inflater = ((Activity) context).getLayoutInflater();
+            convertView = inflater.inflate(R.layout.search_history_item, null);
 
-        TextView placeName = (TextView) convertView.findViewById(R.id.placeName);
-        TextView placeAddress = (TextView) convertView.findViewById(R.id.placeAddress);
+            holder = new ViewHolder();
 
-        placeName.setText(placeNames.get(position));
-        placeAddress.setText(placeAddresses.get(position));
+            holder.placeName = (TextView) convertView.findViewById(R.id.placeName);
+            holder.placeAddress = (TextView) convertView.findViewById(R.id.placeAddress);
+            convertView.setTag(holder);
 
+            holder.placeName.setText(placeNames.get(position));
+            holder.placeAddress.setText(placeAddresses.get(position));
+        }
+        else  {
+            holder = (ViewHolder) convertView.getTag();
+        }
         return convertView;
     }
 }

@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -40,12 +41,17 @@ import java.util.Map;
 
 public class SearchHistoryFragment extends Fragment {
     MainActivity main;
-    ImageButton back;
     CustomSavePlaceAdapter adapter;
     ListView historyList;
     private Context context;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DocumentReference docRef;
+
+    ArrayList<String> placeIdArray;
+    ArrayList<String> placeNameArray;
+    ArrayList<String> placeAddArray;
+    ArrayList<String> placeLatArray;
+    ArrayList<String> placeLongArray;
     public static SearchHistoryFragment newInstance(String strArg1)
     {
         SearchHistoryFragment fragment = new SearchHistoryFragment();
@@ -68,7 +74,6 @@ public class SearchHistoryFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 //        String saveField = "SearchPlaces";
         LinearLayout layout =  (LinearLayout) inflater.inflate(R.layout.search_history_fragment, null);
-        back = (ImageButton) layout.findViewById(R.id.backButton);
         historyList = (ListView) layout.findViewById(R.id.historyList);
         Geocoder geocoder = new Geocoder(main, Locale.getDefault());
 
@@ -76,11 +81,11 @@ public class SearchHistoryFragment extends Fragment {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()) {
-                    ArrayList<String> placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
-                    ArrayList<String> placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
-                    ArrayList<String> placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
-                    ArrayList<String> placeLatArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLatitude");
-                    ArrayList<String> placeLongArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLongtitude");
+                    placeIdArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesId");
+                    placeNameArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesName");
+                    placeAddArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesAddress");
+                    placeLatArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLatitude");
+                    placeLongArray = (ArrayList<String>) documentSnapshot.get("SearchPlacesLongtitude");
 
                     placeIdArray = reverseArrayList(placeIdArray);
                     placeNameArray = reverseArrayList(placeNameArray);
@@ -91,14 +96,21 @@ public class SearchHistoryFragment extends Fragment {
                     if (placeIdArray != null && placeIdArray.size() > 0) {
                         CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, placeIdArray, placeNameArray, placeAddArray);
                         historyList.setAdapter(adapter);
+                        historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                MainActivity.onMsgFromSPToMain("SAVEPLACE", placeIdArray.get(position),
+                                        placeNameArray.get(position), Double.parseDouble(placeLatArray.get(position)),
+                                        Double.parseDouble(placeLongArray.get(position)));
+                                Log.d("hello", "bam nut roi neee");
+                            }
+                        });
                     }
-
                 } else {
                     Log.d("SearchHistoryFragment", "Document does not exist");
                 }
             }
         });
-
         return layout;
     }
 
