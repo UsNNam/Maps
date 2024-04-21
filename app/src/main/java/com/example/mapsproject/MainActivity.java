@@ -104,7 +104,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public Bundle myBundle;
     SavePlaceFragment savePlaceFragment;
     SearchHistoryFragment searchHistoryFragment;
-    RelativeLayout homeLayout;
+//    RelativeLayout homeLayout;
     static RelativeLayout homeLayout;
     private Marker markerAdded;
     private SavePlace sp;
@@ -116,7 +116,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PopupWindow popupWindow;
     static BottomNavigationView navigation;
     CoordinateConvertFragment coordinateConvertFragment;
-    Double testLatlng;
+
+    private static final int PERMISSION_REQUEST_CODE = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -250,28 +251,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 WeatherDataV2.Hour current = w.weatherData.getForecast().getForecastday().get(0).getHour().get(curTime);
                 WeatherDataV2.Condition condition = current.getCondition();
 
-    private static final int PERMISSION_REQUEST_CODE = 123;
 
-    private void checkAndRequestPermissions() {
-        String[] permissions = new String[]{
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.INTERNET,
-                Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
 
-        List<String> listPermissionsNeeded = new ArrayList<>();
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                listPermissionsNeeded.add(permission);
-            }
-        }
-
-        if (!listPermissionsNeeded.isEmpty()) {
-            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSION_REQUEST_CODE);
-        }
-    }
 
                 int isday = current.getIs_day();
                 int code = condition.getCode();
@@ -409,6 +390,27 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
 
 
+    }
+
+    private void checkAndRequestPermissions() {
+        String[] permissions = new String[]{
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.INTERNET,
+                Manifest.permission.CAMERA,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String permission : permissions) {
+            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(permission);
+            }
+        }
+
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), PERMISSION_REQUEST_CODE);
+        }
     }
 
     private void expandBottomSheet() {

@@ -79,8 +79,8 @@ public class SavePlaceFragment extends Fragment {
                 main.showLocationHistory();
             }
         });
-        Geocoder geocoder = new Geocoder(main, Locale.getDefault());
-        List<Address> addresses = null;
+//        Geocoder geocoder = new Geocoder(main, Locale.getDefault());
+//        List<Address> addresses = null;
         Toast.makeText(context, "chay trong nay", Toast.LENGTH_SHORT).show();
 
         SavePlaceDB sp = new SavePlaceDB("test", context);
