@@ -278,7 +278,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         try {
             switch (requestCode) {
                 case REQ_CODE_SPEECH_INPUT: {

@@ -121,7 +121,6 @@ public class HttpRequestTask extends AsyncTask<Void, Void, String> {
                     "routes.polyline.encodedPolyline,routes.legs.steps," +
                     "routes.travelAdvisory,routes.legs.travelAdvisory");
             conn.setDoOutput(true);
-
             DataOutputStream wr = new DataOutputStream(conn.getOutputStream());
             wr.writeBytes(postData);
             wr.flush();

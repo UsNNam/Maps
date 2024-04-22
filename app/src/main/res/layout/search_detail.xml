@@ -7,7 +7,6 @@
     android:background="@color/white"
     android:orientation="vertical">
 
-
     <Button
         android:id="@+id/back"
         android:layout_width="wrap_content"
@@ -258,7 +257,7 @@
                     android:gravity="center_vertical"
                     android:lineSpacingExtra="8dp"
                     android:paddingStart="15dp"
-                    android:text="202 Nguyễn Trọng Kỷ2 Nguyễn Trọng K2 Nguyễn Trọng K2 Nguyễn Trọng K2 Nguyễn Trọng K"
+                    android:text=""
                     android:textColor="#423E3E"
                     android:textSize="16dp" />
 
@@ -297,7 +296,7 @@
 
                     android:inputType="phone"
                     android:paddingStart="15dp"
-                    android:text="0388720233"
+                    android:text=""
                     android:textColor="#423E3E"
                     android:textSize="17dp" />
 
@@ -385,7 +384,7 @@
                     android:layout_marginBottom="15dp"
                     android:layout_weight="11"
                     android:gravity="center_vertical"
-                    android:text="Loremsvdfvdfvdfvdfvdfvdfvvdfv"
+                    android:text=""
                     android:textColor="#888080"
 
                     android:textSize="15dp" />
@@ -421,7 +420,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_horizontal"
-                        android:text="4.6"
+                        android:text="5.0"
                         android:textColor="@color/black"
                         android:textSize="25dp"
                         android:textStyle="bold">

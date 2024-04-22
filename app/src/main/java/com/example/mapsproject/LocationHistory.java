@@ -87,7 +87,7 @@ public class LocationHistory extends Service {
                         if (historyArray == null) {
                             historyArray = new ArrayList<>();
                         }
-                        historyArray.add(currentTime.get(Calendar.DAY_OF_MONTH) + "-" + currentTime.get(Calendar.MONTH) + "-" + currentTime.get(Calendar.YEAR) + " " + currentLocation.getLatitude() + " " + currentLocation.getLongitude());
+                        historyArray.add(currentTime.get(Calendar.DAY_OF_MONTH) + "-" + (currentTime.get(Calendar.MONTH) + 1) + "-" + currentTime.get(Calendar.YEAR) + " " + currentLocation.getLatitude() + " " + currentLocation.getLongitude());
                         Map<String, Object> updates = new HashMap<>();
                         updates.put(saveField, historyArray);
                         docRef.update(updates).addOnSuccessListener(new OnSuccessListener<Void>() {
