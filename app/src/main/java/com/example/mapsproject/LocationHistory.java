@@ -32,7 +32,7 @@ import java.util.Map;
 
 public class LocationHistory extends Service {
     private static final String TAG = "LocationService";
-    private static final long INTERVAL = 5 * 60 * 1000;
+    private static final long INTERVAL = 60 * 1000;
     private Handler handler;
     FirebaseFirestore db;
     CollectionReference colRef;

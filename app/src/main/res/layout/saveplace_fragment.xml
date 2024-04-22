@@ -11,6 +11,16 @@
         android:orientation="horizontal"
         android:background="#31ccfe"
         >
+
+        <ImageButton
+            android:id = "@+id/historyBtn"
+            android:layout_width="40dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="0dp"
+            android:background="@android:color/transparent"
+            android:src="@drawable/history"
+            />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -21,14 +31,7 @@
             android:textFontWeight="700"
             android:textSize="18dp"
             ></TextView>
-<ImageButton
-            android:id = "@+id/historyBtn"
-            android:layout_width="40dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="0dp"
-            android:background="@android:color/transparent"
-            android:src="@drawable/history"
-            />
+
     </LinearLayout>
     <ListView
         android:id="@+id/listfavoriteplace"

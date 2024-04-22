@@ -786,11 +786,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                             int year = Integer.parseInt(date[2]);
                             Calendar currentTime = Calendar.getInstance();
 
-                            locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
+//                            locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
 
-                            /*if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) == month && currentTime.get(Calendar.YEAR) == year) {
+                            if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) == month && currentTime.get(Calendar.YEAR) == year) {
                                 locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
-                            }*/
+                            }
 
                             if (locationArray.size() == 0) {
                                 Toast.makeText(MainActivity.this, "No location history today", Toast.LENGTH_SHORT).show();
