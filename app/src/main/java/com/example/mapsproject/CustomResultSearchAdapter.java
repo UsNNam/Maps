@@ -3,6 +3,8 @@ package com.example.mapsproject;
 import static android.content.ContentValues.TAG;
 import static androidx.core.content.ContextCompat.startActivity;
 
+import static com.example.mapsproject.GlobalVariable.userName;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -58,10 +60,10 @@ public class CustomResultSearchAdapter extends ArrayAdapter<PlaceInfo> {
         this.places = places;
         isSaved = new boolean[places.length];
         Log.i("CustomResultSearchAdapter", "Constructor");
-        sp = new SavePlace("test", context);
+        sp = new SavePlace(userName, context);
 
 
-            SavePlaceDB db = new SavePlaceDB("test",context);
+            SavePlaceDB db = new SavePlaceDB(userName,context);
             db.readData(new SavePlaceDB.FirestoreCallback() {
                 @Override
                 public void onCallback(ArrayList<HashMap<String, Object>> list) {

@@ -2,6 +2,8 @@ package com.example.mapsproject;
 
 import static android.content.ContentValues.TAG;
 
+import static com.example.mapsproject.GlobalVariable.userName;
+
 import android.content.Context;
 import android.location.Address;
 import android.location.Geocoder;
@@ -82,7 +84,7 @@ public class SavePlaceFragment extends Fragment {
 //        List<Address> addresses = null;
         Toast.makeText(context, "chay trong nay", Toast.LENGTH_SHORT).show();
 
-        SavePlaceDB sp = new SavePlaceDB("test", context);
+        SavePlaceDB sp = new SavePlaceDB(userName, context);
         sp.readData(new SavePlaceDB.FirestoreCallback() {
             @Override
             public void onCallback(ArrayList<HashMap<String, Object>> list) throws IOException {
