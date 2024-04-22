@@ -246,31 +246,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
+                w.weatherData=null;
                 if (w.weatherData!=null) {
                     Log.d("TESTWEATHER", w.weatherData + " ");
+
+                    Gson gson = new Gson();
+                    String json = gson.toJson(w.weatherData);
+                    Log.d("TESTWEATHER", json + " ");
+                    WeatherDataV2.Hour current = w.weatherData.getForecast().getForecastday().get(0).getHour().get(curTime);
+                    WeatherDataV2.Condition condition = current.getCondition();
+
+
+                    int isday = current.getIs_day();
+                    int code = condition.getCode();
+                    String icon = condition.getIcon();
+                    String[] parts = icon.split("/");
+                    String id = parts[parts.length - 1].replace(".png", "");
+                    String fullDrawableName = "w" + id;
+                    if (isday == 1) {
+                        fullDrawableName = "w" + id;
+                    } else fullDrawableName = "n" + id;
+                    Log.d("TESTWEATHER", id);
+                    int imgsrc = getResources().getIdentifier(fullDrawableName, "drawable", getPackageName());
+                    weatherbtn.setImageResource(imgsrc);
                 }
-                Gson gson = new Gson();
-                String json = gson.toJson(w.weatherData);
-                Log.d("TESTWEATHER", json + " ");
-                WeatherDataV2.Hour current = w.weatherData.getForecast().getForecastday().get(0).getHour().get(curTime);
-                WeatherDataV2.Condition condition = current.getCondition();
-
-
-
-
-                int isday = current.getIs_day();
-                int code = condition.getCode();
-                String icon = condition.getIcon();
-                String[] parts = icon.split("/");
-                String id = parts[parts.length - 1].replace(".png", "");
-                String fullDrawableName = "w" + id;
-                if (isday ==1) {
-                    fullDrawableName = "w" + id;
-                }
-                else fullDrawableName = "n" + id;
-                Log.d("TESTWEATHER", id);
-                int imgsrc= getResources().getIdentifier(fullDrawableName, "drawable", getPackageName());
-                weatherbtn.setImageResource(imgsrc);
 //                testLatlng = w.getLongitude();
 
             } else {
@@ -329,70 +328,65 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         TextView temperatureView = (TextView) popupView.findViewById(R.id.temperature);
         ImageView imageWeather = (ImageView) popupView.findViewById(R.id.imageWeather);
 //        WeatherDataV2.Timelines timeline =  w.weatherData.getTimelines();
-        WeatherDataV2.Forecast forecast = w.weatherData.getForecast();
-        WeatherDataV2.Forecastday forecastday = forecast.getForecastday().get(0);
-        List <WeatherDataV2.Hour > hour = forecastday.getHour();
-        Gson gson = new Gson();
+        if (w.weatherData!=null) {
+            WeatherDataV2.Forecast forecast = w.weatherData.getForecast();
+            WeatherDataV2.Forecastday forecastday = forecast.getForecastday().get(0);
+            List<WeatherDataV2.Hour> hour = forecastday.getHour();
+            Gson gson = new Gson();
 
 //        List<WeatherData.Hourly> hourly = timeline.getHourly();
-        Calendar calendar = Calendar.getInstance();
-        int curTime = calendar.get(Calendar.HOUR_OF_DAY);
+            Calendar calendar = Calendar.getInstance();
+            int curTime = calendar.get(Calendar.HOUR_OF_DAY);
 
-        for (int index =curTime; index< curTime+7; index++)
-        {
-
-            String time = hour.get(index).getTime();
-            String[] parts = time.split(" ");
-            String timePart = parts[1];
-            String[] timeParts = timePart.split(":");
-            String hourString = timeParts[0];
+            for (int index = curTime; index < curTime + 7; index++) {
+                if (index + 1 > hour.size()) {
+                    break;
+                }
+                String time = hour.get(index).getTime();
+                String[] parts = time.split(" ");
+                String timePart = parts[1];
+                String[] timeParts = timePart.split(":");
+                String hourString = timeParts[0];
 
 //            String hourString = time.substring(11, 13);
 //            WeatherDataV2.Values values = hourly.get(index).getValues();
 //            int weathercode = values.getWeatherCode();
 //            Double temperature = values.getTemperature();
-            final View frame = getLayoutInflater().inflate(R.layout.popup_info, null);
+                final View frame = getLayoutInflater().inflate(R.layout.popup_info, null);
 //            int imgsrc = values.setImg(weathercode);
 
-            Double temperature = hour.get(index).getTemp_c();
-            int weathercode = hour.get(index).getCondition().getCode();
-            String icon = hour.get(index).getCondition().getIcon();
-            int isday = hour.get(index).getIs_day();
-            String[] part = icon.split("/");
-            String id = part[part.length - 1].replace(".png", "");
-            String fullDrawableName = "w" + id;
-            if (isday ==1) {
-                fullDrawableName = "w" + id;
-            }
-            else fullDrawableName = "n" + id;
-            Log.d("TESTWEATHER", id);
-            int imgsrc= getResources().getIdentifier(fullDrawableName, "drawable", getPackageName());
+                Double temperature = hour.get(index).getTemp_c();
+                int weathercode = hour.get(index).getCondition().getCode();
+                String icon = hour.get(index).getCondition().getIcon();
+                int isday = hour.get(index).getIs_day();
+                String[] part = icon.split("/");
+                String id = part[part.length - 1].replace(".png", "");
+                String fullDrawableName = "w" + id;
+                if (isday == 1) {
+                    fullDrawableName = "w" + id;
+                } else fullDrawableName = "n" + id;
+                Log.d("TESTWEATHER", id);
+                int imgsrc = getResources().getIdentifier(fullDrawableName, "drawable", getPackageName());
 
 
-            TextView weatherTemp = (TextView) frame.findViewById(R.id.weatherTemp);
-            ImageView weatherInfoImg = (ImageView) frame.findViewById(R.id.weatherInfoImg);
-            TextView weatherInfoTime = (TextView) frame.findViewById(R.id.weatherInfoTime);
+                TextView weatherTemp = (TextView) frame.findViewById(R.id.weatherTemp);
+                ImageView weatherInfoImg = (ImageView) frame.findViewById(R.id.weatherInfoImg);
+                TextView weatherInfoTime = (TextView) frame.findViewById(R.id.weatherInfoTime);
 
-            weatherTemp.setText(temperature.toString() + "°");
-            weatherInfoImg.setImageResource(imgsrc);
-            if(index !=curTime) {
-                weatherInfoTime.setText(hourString);
-            }
-            else
-            {
-                weatherInfoTime.setText("NOW");
-                imageWeather.setImageResource(imgsrc);
-                temperatureView.setText(temperature.toString() + "°");
+                weatherTemp.setText(temperature.toString() + "°");
+                weatherInfoImg.setImageResource(imgsrc);
+                if (index != curTime) {
+                    weatherInfoTime.setText(hourString);
+                } else {
+                    weatherInfoTime.setText("NOW");
+                    imageWeather.setImageResource(imgsrc);
+                    temperatureView.setText(temperature.toString() + "°");
 
-            }
-            view.addView(frame);
+                }
+                view.addView(frame);
 
-            if(index +1 >hour.size())
-            {
-                break;
             }
         }
-
 
     }
 
