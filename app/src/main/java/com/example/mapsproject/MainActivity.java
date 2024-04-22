@@ -424,9 +424,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
 //        GlobalVariable.myMap = googleMap;
-        LatLng sydney = new LatLng(10.761214, 106.682071);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        LatLng sydney = new LatLng(10.761214, 106.682071);
+//        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         // Zoom in the Google Map, people don't need to zoom in manually
         googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
 
@@ -814,29 +814,29 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 //                            locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
 
-                            if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) == month && currentTime.get(Calendar.YEAR) == year) {
+                            if ( currentTime.get(Calendar.DAY_OF_MONTH) == day && currentTime.get(Calendar.MONTH) + 1 == month && currentTime.get(Calendar.YEAR) == year) {
                                 locationArray.add(new LatLng(Double.parseDouble(splittedItem[1]), Double.parseDouble(splittedItem[2])));
                             }
-
-                            if (locationArray.size() == 0) {
-                                Toast.makeText(MainActivity.this, "No location history today", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-
-                            PolylineOptions polylineOptions = new PolylineOptions();
-                            polylineOptions.addAll(locationArray);
-                            polylineOptions.width(5);
-                            polylineOptions.color(Color.BLUE);
-
-                            if (locationHistoryLine != null) {
-                                locationHistoryLine.remove();
-                                locationHistoryLine = null;
-                            }
-
-                            locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
-                            GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));
-
                         }
+
+                        if (locationArray.size() == 0) {
+                            Toast.makeText(MainActivity.this, "No location history today", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        PolylineOptions polylineOptions = new PolylineOptions();
+                        polylineOptions.addAll(locationArray);
+                        polylineOptions.width(5);
+                        polylineOptions.color(Color.BLUE);
+
+                        if (locationHistoryLine != null) {
+                            locationHistoryLine.remove();
+                            locationHistoryLine = null;
+                        }
+
+                        locationHistoryLine = GlobalVariable.myMap.addPolyline(polylineOptions);
+                        GlobalVariable.myMap.moveCamera(CameraUpdateFactory.newLatLng(locationArray.get(locationArray.size() - 1)));
+
                     }
                     else {
                         Toast.makeText(MainActivity.this, "No location history", Toast.LENGTH_SHORT).show();
