@@ -67,6 +67,9 @@ public class CustomSearchHistoryAdapter extends ArrayAdapter<String> {
 
             holder.placeName.setText(placeNames.get(position));
             holder.placeAddress.setText(placeAddresses.get(position));
+
+
+
         }
         else  {
             holder = (ViewHolder) convertView.getTag();

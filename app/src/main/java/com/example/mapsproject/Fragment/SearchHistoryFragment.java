@@ -96,6 +96,7 @@ public class SearchHistoryFragment extends Fragment {
                     if (placeIdArray != null && placeIdArray.size() > 0) {
                         CustomSearchHistoryAdapter adapter = new CustomSearchHistoryAdapter(context, R.layout.search_history_item, placeIdArray, placeNameArray, placeAddArray);
                         historyList.setAdapter(adapter);
+
                         historyList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                             @Override
                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

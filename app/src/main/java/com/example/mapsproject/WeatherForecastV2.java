@@ -59,7 +59,6 @@ public class WeatherForecastV2 {
         Log.d("TESTWEATHER", urlString);
         CompletableFuture.supplyAsync(() -> {
             try (AsyncHttpClient client = new DefaultAsyncHttpClient()) {
-
                 Response response = client.prepare("GET", urlString)
                         .setHeader("accept", "application/json")
                         .execute()
