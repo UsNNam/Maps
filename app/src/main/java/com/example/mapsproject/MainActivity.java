@@ -425,10 +425,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onMapReady(@NonNull GoogleMap googleMap) {
 //        GlobalVariable.myMap = googleMap;
         LatLng sydney = new LatLng(10.761214, 106.682071);
-        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+//        googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+//        googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
         // Zoom in the Google Map, people don't need to zoom in manually
-        googleMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        googleMap.animateCamera(CameraUpdateFactory.zoomTo(10));
 
         destinationEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
