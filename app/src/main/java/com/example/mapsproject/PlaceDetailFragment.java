@@ -1,6 +1,8 @@
 package com.example.mapsproject;
 
+import static android.content.ContentValues.TAG;
 import static com.example.mapsproject.CustomResultSearchAdapter.getLastLocation;
+import static com.example.mapsproject.GlobalVariable.userName;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -35,6 +37,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
@@ -50,13 +54,14 @@ public class PlaceDetailFragment extends Fragment {
     LinearLayout photoList, dayOfWeek;
     RatingBar ratingBar;
     TextView addition, address, phoneNumber, website;
-    Button direct, share, back;
+    Button direct, share, back, save;
     ImageView directAddress, call, accessWebsite;
 
     LinearLayout addressLayout, phoneLayout, websiteLayout, descriptionLayout;
     View addressLine, phoneLine, websiteLine;
     RecyclerView reviewList;
-
+    private SavePlace sp;
+    private boolean  isSaved ;
     public static PlaceDetailFragment newInstance(String strArg) {
         PlaceDetailFragment fragment = new PlaceDetailFragment();
         Bundle args = new Bundle();
@@ -74,6 +79,8 @@ public class PlaceDetailFragment extends Fragment {
         } catch (IllegalStateException e) {
             throw new IllegalStateException("MainActivity must implement callbacks");
         }
+
+
     }
 
     @Override
@@ -101,7 +108,7 @@ public class PlaceDetailFragment extends Fragment {
         description = layout_blue.findViewById(R.id.description);
         rating1 = layout_blue.findViewById(R.id.rating1);
         reviewList = layout_blue.findViewById(R.id.reviewList);
-
+        save = layout_blue.findViewById(R.id.save);
         progress5star = layout_blue.findViewById(R.id.progress5star);
         progress4star = layout_blue.findViewById(R.id.progress4star);
         progress3star = layout_blue.findViewById(R.id.progress3star);
@@ -145,6 +152,27 @@ public class PlaceDetailFragment extends Fragment {
 
         Log.i("Place1", cur.toString());
         Log.i("Place1", cur.getName());
+        sp = new SavePlace(userName, context);
+
+
+        SavePlaceDB db = new SavePlaceDB(userName,context);
+        db.readData(new SavePlaceDB.FirestoreCallback() {
+            @Override
+            public void onCallback(ArrayList<HashMap<String, Object>> list) {
+
+                String placeID = placeInfo.place.getId();
+                for (HashMap j : list) {
+                    Log.d(TAG, "chay o day ");
+                    if (placeID.equals(j.get("placeID"))) {
+                        Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                        isSaved = true;
+                        break;
+                    }
+                    else isSaved=false;
+                    Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                }
+            }
+        });
 
         if (cur.getReviews() != null) {
 
@@ -371,7 +399,33 @@ public class PlaceDetailFragment extends Fragment {
 
             }
         });
+        save.setSelected(isSaved);
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
+                String ID=cur.getId();
+                String placeName = cur.getName();
+                Toast.makeText(context, ID, Toast.LENGTH_SHORT).show();
+                String[] geometry = placeInfo.getLatLngString().split(",", 2);
+//                sp = datasource.createSavePlace(Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]));
+                if (v.isSelected()==false)
+                {
+//                        sp.addSavePlace(Double.parseDouble(geometry[1]), Double.parseDouble(geometry[0]),v);
+                    sp.addSavePlaceV2(ID,placeName, Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]),v);
+                    Toast.makeText(context, "Save", Toast.LENGTH_SHORT).show();
+                    isSaved=true;
+                }
+                else
+                {
+                    sp.removeSavePlace(ID,placeName, Double.parseDouble(geometry[0]), Double.parseDouble(geometry[1]), v);
+                    Toast.makeText(context, "Remove", Toast.LENGTH_SHORT).show();
+                    isSaved=false;
+                }
+
+
+            }
+        });
 
         //status.setText(places[position].getCurrentOpeningHours().toString());
         return;

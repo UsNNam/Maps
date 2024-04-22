@@ -659,15 +659,14 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
 
             final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(1).build();
             Log.i("Places test", "callApiSearchText   3: " + locationText);
-            loadingDialog.showDialog();
+//            loadingDialog.showDialog();
             placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
                 try {
                     Log.i("Places test", "callApiSearchText   4: " + locationText);
 
                     placeList = response.getPlaces().toArray(new Place[0]);
                     places = new PlaceInfo[placeList.length];
-                    markerAdded.setTag(response.getPlaces().get(0).getId());
-                    Log.d("TESTMARK",response.getPlaces().get(0).getId() + " VVVV " );
+
                     for (Place place : placeList) {
 
                         Log.i("Places test", "Place found: " + place.toString());
@@ -684,7 +683,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                             }
                         }).start();
                     }
-                    loadingDialog.hideDialog();
+//                    loadingDialog.hideDialog();
                     CustomResultSearchAdapter adapter = new CustomResultSearchAdapter(mainActivity, R.layout.search_result, places, placesClient);
 
                     PlaceInfo.adapter = adapter;
@@ -821,8 +820,10 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             searchLocation.setText(addressName);
             Log.d("TESTDETAIL", addressName);
 
+
             callApiPlaceDetail(placeID, addressName);
 //            callApiSearchText2(addressName);
+
             LatLng latlng = new LatLng(latitude,longitude);
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng,15.0f));
 
