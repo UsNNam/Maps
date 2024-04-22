@@ -75,7 +75,6 @@ public class SavePlaceFragment extends Fragment {
         history.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(context, "location history clicked", Toast.LENGTH_SHORT).show();
                 main.showLocationHistory();
             }
         });

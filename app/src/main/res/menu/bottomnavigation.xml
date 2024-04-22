@@ -19,9 +19,14 @@
             android:title="Convert" />
 
         <item
-            android:id="@+id/navigation_profile"
+            android:id="@+id/searchHistoryNavigation"
             android:icon="@drawable/search_history"
             android:title="History" />
+
+    <item
+        android:id="@+id/logoutNavigationButton"
+        android:icon="@drawable/logout"
+        android:title="Logout" />
 
 </menu>
 

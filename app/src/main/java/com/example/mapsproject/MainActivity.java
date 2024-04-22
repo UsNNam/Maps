@@ -9,7 +9,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -721,7 +723,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             } else if (itemId == R.id.saveNavigation) {
                 homeLayout.setVisibility(View.GONE);
-                Toast.makeText(curContext, "Search button selected2", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(curContext, "Search button selected2", Toast.LENGTH_SHORT).show();
                 ft = getSupportFragmentManager().beginTransaction();
                 savePlaceFragment = SavePlaceFragment.newInstance("save_fragment");
                 ft.replace(R.id.fragment_container, savePlaceFragment);
@@ -730,19 +732,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 return true;
             } else if (itemId == R.id.convertNavigation) {
                 homeLayout.setVisibility(View.GONE);
-                Toast.makeText(curContext, "Search button selected3", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(curContext, "Search button selected3", Toast.LENGTH_SHORT).show();
                 ft = getSupportFragmentManager().beginTransaction();
                 coordinateConvertFragment = CoordinateConvertFragment.newInstance("coordinate_fragment");
                 ft.replace(R.id.fragment_container, coordinateConvertFragment);
                 ft.commit();
                 return true;
-            } else if (itemId == R.id.navigation_profile) {
+            } else if (itemId == R.id.searchHistoryNavigation) {
                 homeLayout.setVisibility(View.GONE);
-                Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(curContext, "Search button selected4", Toast.LENGTH_SHORT).show();
                 ft = getSupportFragmentManager().beginTransaction();
                 searchHistoryFragment = SearchHistoryFragment.newInstance("search_history");
                 ft.replace(R.id.fragment_container, searchHistoryFragment);
                 ft.commit();
+
+                return true;
+            } else if (itemId == R.id.logoutNavigationButton) {
+                int selectedId = navigation.getSelectedItemId();
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Confirmation");
+                builder.setMessage("Are you sure you want to logout?");
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        SessionManager session = new SessionManager(getApplicationContext());
+                        session.setLogin(false, "");
+                        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent);
+//                        Toast.makeText(MainActivity.this, "logout", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss(); // Close the dialog
+                    }
+                });
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        navigation.setSelectedItemId(selectedId);
+                        dialog.dismiss();
+                    }
+                });
+                AlertDialog dialog = builder.create();
+                dialog.show();
 
                 return true;
             }
