@@ -246,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-                w.weatherData=null;
+
                 if (w.weatherData!=null) {
                     Log.d("TESTWEATHER", w.weatherData + " ");
 
