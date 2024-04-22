@@ -1,6 +1,8 @@
 package com.example.mapsproject;
 
 
+import static com.example.mapsproject.GlobalVariable.userName;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -540,8 +542,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
 
         googleMap.setOnMapClickListener(this);
-        sp = new SavePlace("test",curContext);
-        SavePlaceDB db = new SavePlaceDB("test", curContext);
+        sp = new SavePlace(userName,curContext);
+        SavePlaceDB db = new SavePlaceDB(userName, curContext);
         db.readData(new SavePlaceDB.FirestoreCallback() {
             @Override
             public void onCallback(ArrayList<HashMap<String, Object>> list) throws IOException {
