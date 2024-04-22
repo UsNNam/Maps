@@ -521,7 +521,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                                 } catch (Exception e) {
                                     Log.e("Error Search Place API thread: ", e.getMessage());
                                 }
-
                             }
                         }).start();
                     }
@@ -676,6 +675,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                             public void run() {
                                 try {
                                     places[response.getPlaces().indexOf(place)] = new PlaceInfo(place, placesClient);
+                                    Log.e("Testtttttt ", "dfv"+places[0].place.getPhotoMetadatas());
                                 } catch (Exception e) {
                                     Log.e("Error Search Place API thread: ", e.getMessage());
                                 }
@@ -791,7 +791,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                 Log.d("TESTGEO", addresses.get(0).getFeatureName());
                 Log.d("test", "leeeeeee");
                 searchLocation.setText(addresses.get(0).getAddressLine(0));
-                callApiSearchText2(addresses.get(0).getAddressLine(0));
+                //callApiSearchText2(addresses.get(0).getAddressLine(0));
                 markerAdded.setTitle(addresses.get(0).getAddressLine(0));
                 markerAdded.showInfoWindow();
 
@@ -821,7 +821,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             Log.d("TESTDETAIL", addressName);
 
             callApiPlaceDetail(placeID, addressName);
-//            callApiSearchText2(addressName);
+            callApiSearchText2(addressName);
             LatLng latlng = new LatLng(latitude,longitude);
             googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latlng,15.0f));
 
@@ -829,7 +829,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     }
     @SuppressLint("SuspiciousIndentation")
     private void callApiPlaceDetail (String placeID, String placeName) {
-        List<Place.Field> placeFields = Arrays.asList( Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER,  Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS);
+        List<Place.Field> placeFields = Arrays.asList( Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
         FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, placeFields);
 
         Log.d ("TESTDETAIL", "CHAY O DAY");
