@@ -147,7 +147,7 @@ public class LoginActivity extends AppCompatActivity {
                     loginUsername.setError(null);
                     String passwordFromDB = snapshot.child(userUsername).child("password").getValue(String.class);
 
-                    if(Objects.equals(passwordFromDB, userPassword)) {
+                    if(checkPassword(userPassword, passwordFromDB)) {
                         loginUsername.setError(null);
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         session.setLogin(true, userUsername);
