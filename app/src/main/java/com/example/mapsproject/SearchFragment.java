@@ -521,7 +521,6 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                                 } catch (Exception e) {
                                     Log.e("Error Search Place API thread: ", e.getMessage());
                                 }
-
                             }
                         }).start();
                     }
@@ -837,7 +836,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
     }
     @SuppressLint("SuspiciousIndentation")
     private void callApiPlaceDetail (String placeID, String placeName) {
-        List<Place.Field> placeFields = Arrays.asList( Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER,  Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS);
+        List<Place.Field> placeFields = Arrays.asList( Place.Field.EDITORIAL_SUMMARY, Place.Field.ID, Place.Field.NAME, Place.Field.PHONE_NUMBER, Place.Field.PHOTO_METADATAS, Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.WEBSITE_URI, Place.Field.PRICE_LEVEL, Place.Field.CURRENT_OPENING_HOURS, Place.Field.PHONE_NUMBER, Place.Field.PRICE_LEVEL, Place.Field.OPENING_HOURS, Place.Field.REVIEWS, Place.Field.EDITORIAL_SUMMARY);
         FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeID, placeFields);
 
         Log.d ("TESTDETAIL", "CHAY O DAY");

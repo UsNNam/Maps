@@ -21,6 +21,7 @@ public class SessionManager {
     public void setLogin(boolean isLoggedIn, String username) {
         editor.putBoolean(KEY_IS_LOGGED_IN, isLoggedIn);
         editor.putString(KEY_USERNAME, username);
+        GlobalVariable.userName = username;
         editor.apply();
     }
 
