@@ -183,10 +183,8 @@ public class PlaceDetailFragment extends Fragment {
             name.setText(cur.getName());
         }
 
-        cur.getCurrentOpeningHours().getWeekdayText().forEach(s -> Log.i("Weekday", s));
-        for (Review review : cur.getReviews()) {
-            Log.i("Review", review.getRating().toString());
-        }
+
+        //.getCurrentOpeningHours().getWeekdayText().forEach(s -> Log.i("Weekday", s));
         // Rating
         if (cur.getRating() != null) {
             Log.i("Place1", String.valueOf(cur.getRating()));
