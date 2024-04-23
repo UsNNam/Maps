@@ -67,11 +67,11 @@
 
                         android:layout_width="43dp"
                         android:layout_height="43dp"
-                        android:backgroundTint="@android:color/white"
-                        android:drawableTop="@drawable/save"
+                        android:backgroundTint="@null"
+                        android:drawableTop="@drawable/save_button_selector"
                         android:foreground="@drawable/button_selector"
                         android:gravity="center"
-
+                        android:background="@android:color/transparent"
                         android:paddingTop="14dp"
                         android:textColor="#000000"
                         android:textSize="15sp"
