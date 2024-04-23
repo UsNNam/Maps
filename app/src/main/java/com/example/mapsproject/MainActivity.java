@@ -754,6 +754,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     public void onClick(DialogInterface dialog, int which) {
                         SessionManager session = new SessionManager(getApplicationContext());
                         session.setLogin(false, "");
+                        GlobalVariable.userName = "";
                         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
                         startActivity(intent);
 //                        Toast.makeText(MainActivity.this, "logout", Toast.LENGTH_SHORT).show();
