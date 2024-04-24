@@ -644,7 +644,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
         try {
             PlaceInfo.stop();
 
-            Log.i("Places test", "callApiSearchText   1: " + locationText);
+            Log.i("Places test abcxxx", "callApiSearchText   1: " + locationText);
             // Restrict the areas
             Location currentLocation = googleMap.getMyLocation();
             if (currentLocation == null) {
@@ -658,13 +658,17 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             final SearchByTextRequest searchByTextRequest = SearchByTextRequest.builder(locationText, placeFields).setMaxResultCount(1).build();
             Log.i("Places test", "callApiSearchText   3: " + locationText);
 //            loadingDialog.showDialog();
+
             placesClient.searchByText(searchByTextRequest).addOnSuccessListener(response -> {
                 try {
                     Log.i("Places test", "callApiSearchText   4: " + locationText);
 
                     placeList = response.getPlaces().toArray(new Place[0]);
                     places = new PlaceInfo[placeList.length];
-
+//                    if(isAppeared == true)
+//                    {
+//                        markerAdded.setTag(response.getPlaces().get(0).getId());
+//                    }
                     for (Place place : placeList) {
 
                         Log.i("Places test", "Place found: " + place.toString());
@@ -754,6 +758,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                     listViewSearchResult.setVisibility(View.GONE);
                     markerAdded.remove();
                     markerAdded=null;
+
                 }
 
             }
@@ -789,6 +794,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
                 Log.d("TESTGEO", addresses.get(0).getFeatureName());
                 Log.d("test", "leeeeeee");
                 searchLocation.setText(addresses.get(0).getAddressLine(0));
+
                 callApiSearchText2(addresses.get(0).getAddressLine(0));
                 markerAdded.setTitle(addresses.get(0).getAddressLine(0));
                 markerAdded.showInfoWindow();
@@ -804,6 +810,7 @@ public class SearchFragment extends Fragment implements TextWatcher, ActivityCom
             listViewSearchResult.setVisibility(View.GONE);
             markerAdded.remove();
             markerAdded=null;
+
         }
         // Hiển thị thông tin tọa độ latLng lên log hoặc UI
         Log.i("MapClick", "Lat: " + latLng.latitude + ", Long: " + latLng.longitude);
