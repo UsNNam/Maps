@@ -148,6 +148,11 @@ public class RouteActivity {
             String routeInfo = summaryTextView.getText().toString();
             String[] routeInfoArr = routeInfo.split(" km");
 
+            if(routeInfoArr.length <= 1){
+                Toast.makeText(context, "Please select a route", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             intent.putExtra("distance", Double.parseDouble(routeInfoArr[0]));
             startActivity(context, intent,null);
         });
@@ -171,6 +176,9 @@ public class RouteActivity {
     }
 
     public void displayRouteInfo(){
+        startLocationEditText.setText("");
+        endLocationEditText.setText("");
+        addLocationEditText.setText("");
         searchLayout.setVisibility(LinearLayout.GONE);
         routeLayout.setVisibility(LinearLayout.VISIBLE);
         addLocationButton.setVisibility(LinearLayout.VISIBLE);
