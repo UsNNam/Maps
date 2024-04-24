@@ -173,6 +173,8 @@ public class RouteActivity {
     public void displayRouteInfo(){
         searchLayout.setVisibility(LinearLayout.GONE);
         routeLayout.setVisibility(LinearLayout.VISIBLE);
+        addLocationButton.setVisibility(LinearLayout.VISIBLE);
+        addLocationTextInputLayout.setVisibility(LinearLayout.GONE);
     }
 
 
