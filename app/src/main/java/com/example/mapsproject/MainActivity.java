@@ -554,6 +554,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        sp.setMarkOnMap(googleMap);
         googleMap.setOnMarkerClickListener(marker -> {
             // Phóng to vào marker khi người dùng nhấp vào nó
+            if(marker.getTag()==null || marker.getTitle() == null)
+            {
+                return false;
+            }
             Log.d("TESTMARKER", " "+marker.getTag()+" "+ marker.getTitle() +" " + marker.getPosition());
             googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 20)); // 10 ở đây là mức độ zoom mong muốn
             searchFragment.onMsgFromMainToSearch("SP2MAIN", marker.getTag().toString(), marker.getTitle(), marker.getPosition().latitude, marker.getPosition().longitude);

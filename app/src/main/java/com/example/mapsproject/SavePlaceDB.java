@@ -98,7 +98,7 @@ public class SavePlaceDB  {
 
     public void readData(FirestoreCallback firestoreCallback)
     {
-        loadingDialog.showDialog();
+//        loadingDialog.showDialog();
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -135,7 +135,7 @@ public class SavePlaceDB  {
                     }
                     Log.d(TAG, "get failed with ", task.getException());
                 }
-                loadingDialog.hideDialog();
+//                loadingDialog.hideDialog();
             }
 
         });

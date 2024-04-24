@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -160,19 +162,31 @@ public class PlaceDetailFragment extends Fragment {
             @Override
             public void onCallback(ArrayList<HashMap<String, Object>> list) {
 
-                String placeID = placeInfo.place.getId();
+                String placeID = cur.getId();
                 for (HashMap j : list) {
                     Log.d(TAG, "chay o day ");
                     if (placeID.equals(j.get("placeID"))) {
-                        Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                        Log.d("TEST22", "run here [" + placeID + "] , " + j.get("placeID") );
                         isSaved = true;
                         break;
                     }
                     else isSaved=false;
-                    Log.d("TEST", "run here [" + placeID + "] , " + j.get("placeID") );
+                    Log.d("TEST22", "run here [" + placeID + "] , " + j.get("placeID") );
                 }
+                save.setSelected(isSaved);
+//                Handler handler = new Handler(Looper.getMainLooper());
+//                handler.post(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        // Cập nhật UI dựa trên trạng thái của isSave
+//                        // Hiển thị trạng thái đã lưu
+//                        Log.d("test22", isSaved + " vvvv");
+//
+//                    }
+//                });
             }
         });
+
 
         if (cur.getReviews() != null) {
 
@@ -397,7 +411,7 @@ public class PlaceDetailFragment extends Fragment {
 
             }
         });
-        save.setSelected(isSaved);
+
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
